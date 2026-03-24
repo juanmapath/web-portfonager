@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: 'Inter', sans-serif;
+    --font-space-grotesk: 'Space Grotesk', sans-serif;
+    --font-jetbrains-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  * {
+    cursor: crosshair;
+  }
+
+  body {
+    @apply bg-void text-gray-200 antialiased overflow-x-hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading uppercase tracking-wider font-extrabold;
+  }
+
+  /* Custom Background Grids & Scanlines */
+  body::before {
+    content: "";
+    @apply fixed inset-0 bg-grid-pattern pointer-events-none -z-10;
+    background-size: 40px 40px;
+  }
+
+  body::after {
+    content: "";
+    @apply fixed inset-0 bg-scanlines pointer-events-none z-[1000] opacity-15;
+    background-size: 100% 4px, 3px 100%;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-terminal-green rounded-none;
+  }
+}
+
+@layer components {
+  .cyber-card {
+    @apply bg-panel border border-border-subtle relative transition-all duration-300 overflow-hidden;
+  }
+
+  .cyber-card:hover {
+    @apply border-terminal-green-glow bg-surface;
+    box-shadow: 0 0 20px rgba(0, 255, 148, 0.05);
+  }
+
+  .cyber-card::after {
+    content: "";
+    @apply absolute top-0 right-0 w-5 h-5;
+    background: linear-gradient(225deg, rgba(255, 255, 255, 0.05) 50%, transparent 50%);
+  }
+
+  .glass-panel {
+    @apply bg-panel/60 backdrop-blur-xl border border-white/5;
+  }
+}
+
+@layer utilities {
+  .neon-glow {
+    filter: drop-shadow(0 0 5px rgba(0, 255, 148, 0.4));
+  }
+  
+  .neon-text {
+    @apply text-terminal-green;
+    text-shadow: 0 0 8px rgba(0, 255, 148, 0.5);
+  }
+
+  .label-sm {
+    @apply text-[10px] font-bold uppercase tracking-[0.2em] text-terminal-green opacity-80;
+  }
+}
