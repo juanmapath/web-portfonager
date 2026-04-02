@@ -1,4 +1,4 @@
-import { Family, Bot, Broker, BotAsset, AggregatedStats } from './types';
+import { Family, Bot, Broker, BotAsset, AggregatedStats, PortfolioHistory } from './types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_PROFTVIEW_API_URL || 'http://localhost:8000/api/proftview';
 
@@ -132,5 +132,16 @@ export const apiProftviewClient = {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const dataRes: unknown = await res.json();
     return dataRes;
+  },
+
+  async getHistory(botId?: number): Promise<PortfolioHistory[]> {
+    let url = `${BASE_URL}/history/`;
+    if (botId !== undefined) {
+      url += `?bot_id=${botId}`;
+    }
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data: unknown = await res.json();
+    return data as PortfolioHistory[];
   }
 };

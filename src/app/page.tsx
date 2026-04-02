@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Terminal, Activity, TrendingUp, Zap, LogOut } from "lucide-react";
 import { useAuth } from "@/app/api/auth-context";
 import { LoginModal } from "@/components/LoginModal";
+import { PortfolioHistoryChart } from "@/components/PortfolioHistoryChart";
+
 
 export default function DashboardPage() {
   const { isAuthenticated, logout } = useAuth();
@@ -50,6 +52,11 @@ export default function DashboardPage() {
         </div>
       </header>
 
+      {/* Portfolio History Chart Section */}
+      <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <PortfolioHistoryChart />
+      </section>
+
       {/* Main Stats Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         {[
@@ -86,23 +93,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Performance section */}
-      <div className="space-y-6 pt-8">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <Zap size={14} className="text-terminal-green" />
-            <h2 className="text-[10px] font-extrabold tracking-[0.3em] uppercase text-terminal-green">Backtest Explorer</h2>
-          </div>
-          <h2 className="text-2xl font-black tracking-tight uppercase text-white">System Performance Analysis</h2>
-        </div>
-
-        <div className="cyber-card w-full h-[350px] flex flex-col items-center justify-center border-dashed rounded-xl bg-panel">
-          <Activity size={40} className="text-white/10 mb-6" />
-          <p className="text-[10px] font-mono text-gray-600 uppercase tracking-[0.4em] max-w-sm text-center leading-loose">
-            Select a system configuration to load historical performance data
-          </p>
-        </div>
-      </div>
 
       {/* Bottom Status Bar */}
       <div className="fixed bottom-0 left-0 right-0 h-1 bg-void z-[1001]">

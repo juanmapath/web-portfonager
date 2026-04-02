@@ -281,9 +281,19 @@ export default function BotsPage() {
           <div className="cyber-card p-4 rounded-xl border-t-2 border-t-terminal-green/30 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-b from-terminal-green/[0.02] to-transparent pointer-events-none"></div>
             <p className="text-[10px] text-gray-500 uppercase tracking-widest relative z-10">Capital</p>
-            <p className="font-mono text-white text-xl mt-1 relative z-10">
-              ${(aggregatedStats.cap_to_trade_sum + aggregatedStats.cap_value_in_trade_sum).toLocaleString()}
-            </p>
+            <div className="mt-1 relative z-10 font-mono">
+              <p className="text-sky-400 text-lg md:text-xl font-bold">
+                ${(aggregatedStats.cap_to_trade_sum + aggregatedStats.cap_value_in_trade_sum + aggregatedStats.cap_to_add_sum + aggregatedStats.cap_no_asignado).toLocaleString()}
+              </p>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <p className="text-white text-base md:text-lg">
+                  ${(aggregatedStats.cap_to_trade_sum + aggregatedStats.cap_value_in_trade_sum).toLocaleString()}
+                </p>
+                <p className="text-terminal-green text-xs md:text-sm font-bold opacity-80">
+                  +{(aggregatedStats.cap_to_add_sum + aggregatedStats.cap_no_asignado).toLocaleString()}
+                </p>
+              </div>
+            </div>
           </div>
           <div className="cyber-card p-4 rounded-xl border-t-2 border-t-terminal-green/30 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-b from-terminal-green/[0.02] to-transparent pointer-events-none"></div>

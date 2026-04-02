@@ -83,3 +83,16 @@ export interface AggregatedStats {
   cap_no_asignado: number;
   total_capital_added: number;
 }
+
+export interface PortfolioHistory {
+  date: string;
+  capital: number;
+  chg_log: number;
+  log_cum_sum: number;
+  ret_cums: number;
+  cagr: number;
+  spy_price: number;
+  spy_ret: number;
+  qqq_price: number;
+  qqq_ret: number;
+}
