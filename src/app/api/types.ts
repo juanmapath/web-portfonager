@@ -96,3 +96,37 @@ export interface PortfolioHistory {
   qqq_price: number;
   qqq_ret: number;
 }
+
+export interface Tactic {
+  id: number;
+  name: string;
+  active: boolean;
+  params: Record<string, string>;
+  market_cap_category: string;
+  overall_weights: Record<string, number>;
+  value_weights: Record<string, number>;
+  quality_weights: Record<string, number>;
+  trend_weights: Record<string, number>;
+  latest_session_id: number | null;
+}
+
+export interface SelectedAsset {
+  id: number;
+  ticker: string;
+  company_name: string;
+  sector: string;
+  industry: string;
+  country: string;
+  market_cap: string;
+  score: number;
+  raw_metrics: Record<string, string>;
+  session: number;
+}
+
+export interface CompetitorAsset {
+  id: number;
+  ticker: string;
+  company_name: string;
+  raw_metrics: Record<string, string>;
+  target_asset: number;
+}

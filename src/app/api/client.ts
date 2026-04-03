@@ -1,4 +1,4 @@
-import { Family, Bot, Broker, BotAsset, AggregatedStats, PortfolioHistory } from './types';
+import { Family, Bot, Broker, BotAsset, AggregatedStats, PortfolioHistory, Tactic, SelectedAsset, CompetitorAsset } from './types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_PROFTVIEW_API_URL || 'http://localhost:8000/api/proftview';
 
@@ -143,5 +143,30 @@ export const apiProftviewClient = {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data: unknown = await res.json();
     return data as PortfolioHistory[];
+  }
+};
+
+const GEMS_BASE_URL = process.env.NEXT_PUBLIC_GEMS_API_URL || 'http://localhost:8000/api/gemsfinder';
+
+export const apiGemsfinderClient = {
+  async getTactics(): Promise<Tactic[]> {
+    const res = await fetch(`${GEMS_BASE_URL}/tactics/`);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data: unknown = await res.json();
+    return data as Tactic[];
+  },
+
+  async getAssets(sessionId: number): Promise<SelectedAsset[]> {
+    const res = await fetch(`${GEMS_BASE_URL}/assets/?session=${sessionId}`);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data: unknown = await res.json();
+    return data as SelectedAsset[];
+  },
+
+  async getCompetitors(targetAssetId: number): Promise<CompetitorAsset[]> {
+    const res = await fetch(`${GEMS_BASE_URL}/competitors/?target_asset=${targetAssetId}`);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data: unknown = await res.json();
+    return data as CompetitorAsset[];
   }
 };
