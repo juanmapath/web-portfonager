@@ -87,7 +87,6 @@ export interface AggregatedStats {
 export interface PortfolioHistory {
   date: string;
   capital: number;
-  chg_log: number;
   log_cum_sum: number;
   ret_cums: number;
   cagr: number;

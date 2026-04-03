@@ -37,32 +37,31 @@ export default function GemsDashboard() {
     }
   }, []);
 
+  // Only select the asset — do NOT auto-trigger analysis
   const handleAssetSelect = useCallback((asset: SelectedAsset) => {
     setSelectedAsset(asset);
-    runAnalysis(asset);
-  }, [runAnalysis]);
+    setAiAnalysis('');
+    setAnalysisError(null);
+  }, []);
 
-  const handleRetry = useCallback(() => {
+  // Manual trigger for AI analysis
+  const handleRunAnalysis = useCallback(() => {
     if (selectedAsset) runAnalysis(selectedAsset);
   }, [selectedAsset, runAnalysis]);
 
   return (
     <>
-      {/* AI Analysis panel — shown whenever an asset is selected */}
-      {selectedAsset && (
-        <div className="mt-4">
-          <AIAnalysisPanel
-            asset={selectedAsset}
-            analysis={aiAnalysis}
-            isLoading={isAnalyzing}
-            error={analysisError}
-            onRetry={handleRetry}
-          />
-        </div>
-      )}
-
       {/* Main scrapper section with tactics, table, and competitor charts */}
       <ScrapperTactics onAssetSelect={handleAssetSelect} />
+
+      {/* AI Analysis panel — always visible once an asset is selected */}
+      <AIAnalysisPanel
+        asset={selectedAsset}
+        analysis={aiAnalysis}
+        isLoading={isAnalyzing}
+        error={analysisError}
+        onAnalyze={handleRunAnalysis}
+      />
     </>
   );
 }

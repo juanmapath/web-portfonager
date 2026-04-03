@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  LineChart, 
-  Line, 
-  Legend 
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  Legend
 } from "recharts";
 import { Activity, TrendingUp, BarChart2 } from "lucide-react";
 import { apiProftviewClient } from "@/app/api/client";
@@ -67,9 +67,9 @@ export function PortfolioHistoryChart() {
             <div key={index} className="flex justify-between gap-4 mb-0.5">
               <span className="uppercase text-gray-500">{entry.name}:</span>
               <span style={{ color: entry.color }} className="font-bold">
-                {entry.name === "capital" 
+                {entry.name === "capital"
                   ? `$${entry.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
-                  : `${(entry.value * 100).toFixed(2)}%`}
+                  : `${(entry.value).toFixed(2)}%`}
               </span>
             </div>
           ))}
@@ -96,22 +96,20 @@ export function PortfolioHistoryChart() {
         <div className="flex bg-void/50 p-1 rounded-md border border-white/5">
           <button
             onClick={() => setActiveTab("capital")}
-            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all rounded-sm flex items-center gap-2 ${
-              activeTab === "capital" 
-                ? "bg-terminal-green text-black" 
-                : "text-gray-500 hover:text-white"
-            }`}
+            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all rounded-sm flex items-center gap-2 ${activeTab === "capital"
+              ? "bg-terminal-green text-black"
+              : "text-gray-500 hover:text-white"
+              }`}
           >
             <TrendingUp size={12} />
             Capital
           </button>
           <button
             onClick={() => setActiveTab("returns")}
-            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all rounded-sm flex items-center gap-2 ${
-              activeTab === "returns" 
-                ? "bg-cyber-purple text-white shadow-[0_0_15px_rgba(157,78,221,0.3)]" 
-                : "text-gray-500 hover:text-white"
-            }`}
+            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all rounded-sm flex items-center gap-2 ${activeTab === "returns"
+              ? "bg-cyber-purple text-white shadow-[0_0_15px_rgba(157,78,221,0.3)]"
+              : "text-gray-500 hover:text-white"
+              }`}
           >
             <Activity size={12} />
             Rendimientos
@@ -123,100 +121,100 @@ export function PortfolioHistoryChart() {
       <div className="w-full h-[350px] min-h-[350px] p-6 pt-2 relative">
         {data.length > 0 && (
           <ResponsiveContainer width="100%" height="100%" key={data.length}>
-          {activeTab === "capital" ? (
-            <AreaChart data={data}>
-              <defs>
-                <linearGradient id="colorCapital" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#00ff94" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#00ff94" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-              <XAxis 
-                dataKey="date" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: '#4b5563', fontSize: 9, fontFamily: 'monospace' }}
-                dy={10}
-              />
-              <YAxis 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: '#4b5563', fontSize: 9, fontFamily: 'monospace' }}
-                tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Area 
-                type="monotone" 
-                dataKey="capital" 
-                name="capital"
-                stroke="#00ff94" 
-                strokeWidth={2}
-                fillOpacity={1} 
-                fill="url(#colorCapital)" 
-                animationDuration={1500}
-              />
-            </AreaChart>
-          ) : (
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-              <XAxis 
-                dataKey="date" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: '#4b5563', fontSize: 9, fontFamily: 'monospace' }}
-                dy={10}
-              />
-              <YAxis 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: '#4b5563', fontSize: 9, fontFamily: 'monospace' }}
-                tickFormatter={(val) => `${(val * 100).toFixed(0)}%`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                verticalAlign="top" 
-                align="right" 
-                iconType="rect"
-                wrapperStyle={{ 
-                  fontSize: '9px', 
-                  fontFamily: 'monospace', 
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  paddingBottom: '20px'
-                }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="ret_cums" 
-                name="Portfolio" 
-                stroke="#00ff94" 
-                strokeWidth={3}
-                dot={false}
-                activeDot={{ r: 4, stroke: '#00ff94', strokeWidth: 2, fill: '#000' }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="spy_ret" 
-                name="SPY" 
-                stroke="#9d4edd" 
-                strokeWidth={1.5}
-                dot={false}
-                strokeDasharray="5 5"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="qqq_ret" 
-                name="QQQ" 
-                stroke="#48cae4" 
-                strokeWidth={1.5}
-                dot={false}
-                strokeDasharray="5 5"
-              />
-            </LineChart>
-          )}
-        </ResponsiveContainer>
-      )}
+            {activeTab === "capital" ? (
+              <AreaChart data={data}>
+                <defs>
+                  <linearGradient id="colorCapital" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#00ff94" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#00ff94" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#4b5563', fontSize: 9, fontFamily: 'monospace' }}
+                  dy={10}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#4b5563', fontSize: 9, fontFamily: 'monospace' }}
+                  tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="capital"
+                  name="capital"
+                  stroke="#00ff94"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorCapital)"
+                  animationDuration={1500}
+                />
+              </AreaChart>
+            ) : (
+              <LineChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#4b5563', fontSize: 9, fontFamily: 'monospace' }}
+                  dy={10}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#4b5563', fontSize: 9, fontFamily: 'monospace' }}
+                  tickFormatter={(val) => `${(val).toFixed(1)}%`}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend
+                  verticalAlign="top"
+                  align="right"
+                  iconType="rect"
+                  wrapperStyle={{
+                    fontSize: '9px',
+                    fontFamily: 'monospace',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    paddingBottom: '20px'
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="ret_cums"
+                  name="Portfolio"
+                  stroke="#00ff94"
+                  strokeWidth={3}
+                  dot={false}
+                  activeDot={{ r: 4, stroke: '#00ff94', strokeWidth: 2, fill: '#000' }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="spy_ret"
+                  name="SPY"
+                  stroke="#9d4edd"
+                  strokeWidth={1.5}
+                  dot={false}
+                  strokeDasharray="5 5"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="qqq_ret"
+                  name="QQQ"
+                  stroke="#48cae4"
+                  strokeWidth={1.5}
+                  dot={false}
+                  strokeDasharray="5 5"
+                />
+              </LineChart>
+            )}
+          </ResponsiveContainer>
+        )}
       </div>
       {/* Footer / Status */}
       <div className="px-6 py-4 bg-void/30 border-t border-white/5 flex justify-between items-center">

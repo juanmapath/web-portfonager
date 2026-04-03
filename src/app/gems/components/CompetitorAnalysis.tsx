@@ -99,10 +99,20 @@ function BarTab({
           <Tooltip
             contentStyle={TOOLTIP_STYLE}
             cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-            formatter={(v: unknown) => [
-              `${typeof v === 'number' ? v.toFixed(2) : v}`,
-              label,
-            ]}
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
+              const d = payload[0].payload as ComboAsset;
+              const val = payload[0].value;
+              return (
+                <div style={TOOLTIP_STYLE} className="p-3 rounded-lg shadow-xl">
+                  <p className="font-bold text-white mb-1 mono">{d.ticker}</p>
+                  <p className="text-gray-400 text-[10px] mb-1.5">{d.company_name}</p>
+                  <p className="text-cyan-400 text-xs">
+                    {label}: <span className="font-bold">{typeof val === 'number' ? val.toFixed(2) : val}</span>
+                  </p>
+                </div>
+              );
+            }}
           />
           <ReferenceLine
             x={mean}
@@ -203,7 +213,7 @@ function BubbleChart({
             name={cfg.zLabel}
           />
           <Tooltip
-            cursor={{ strokeDasharray: '4 4', stroke: 'rgba(255,255,255,0.1)' }}
+            cursor={{ strokeDasharray: '4 4', stroke: 'rgba(255, 255, 255, 0.5)' }}
             contentStyle={TOOLTIP_STYLE}
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
@@ -249,11 +259,11 @@ const LEFT_METRICS: {
   label: string;
   color: string;
 }[] = [
-  { key: 'roic', label: 'ROIC (%)', color: NEON },
-  { key: 'oper_margin', label: 'Op. Margin (%)', color: '#f59e0b' },
-  { key: 'sales_growth_yoy', label: 'Sales Growth YoY (%)', color: '#10b981' },
-  { key: 'ev_ebitda', label: 'EV/EBITDA', color: '#a855f7' },
-];
+    { key: 'roic', label: 'ROIC (%)', color: NEON },
+    { key: 'oper_margin', label: 'Op. Margin (%)', color: '#f59e0b' },
+    { key: 'sales_growth_yoy', label: 'Sales Growth YoY (%)', color: '#10b981' },
+    { key: 'ev_ebitda', label: 'EV/EBITDA', color: '#a855f7' },
+  ];
 
 const RIGHT_TABS: {
   id: string;
@@ -262,49 +272,49 @@ const RIGHT_TABS: {
   icon: React.ReactNode;
   cfg: ScatterTabConfig;
 }[] = [
-  {
-    id: 'compounder',
-    label: 'Compounder',
-    subtitle: 'Calidad + Crecimiento',
-    icon: <TrendingUp className="w-3.5 h-3.5" />,
-    cfg: {
-      xKey: 'sales_growth_yoy',
-      yKey: 'roic',
-      zKey: 'inv_pfcf',
-      xLabel: 'Sales Growth YoY (%)',
-      yLabel: 'ROIC (%)',
-      zLabel: '1/P•FCF',
+    {
+      id: 'compounder',
+      label: 'Compounder',
+      subtitle: 'Calidad + Crecimiento',
+      icon: <TrendingUp className="w-3.5 h-3.5" />,
+      cfg: {
+        xKey: 'sales_growth_yoy',
+        yKey: 'roic',
+        zKey: 'inv_pfcf',
+        xLabel: 'Sales Growth YoY (%)',
+        yLabel: 'ROIC (%)',
+        zLabel: '1/P•FCF',
+      },
     },
-  },
-  {
-    id: 'ganga',
-    label: 'Ganga',
-    subtitle: 'Eficiencia de Capital vs. Valoración',
-    icon: <Zap className="w-3.5 h-3.5" />,
-    cfg: {
-      xKey: 'ev_ebitda',
-      yKey: 'roic',
-      zKey: 'inv_peg',
-      xLabel: 'EV/EBITDA',
-      yLabel: 'ROIC (%)',
-      zLabel: '1/PEG',
+    {
+      id: 'ganga',
+      label: 'Ganga',
+      subtitle: 'Eficiencia de Capital vs. Valoración',
+      icon: <Zap className="w-3.5 h-3.5" />,
+      cfg: {
+        xKey: 'ev_ebitda',
+        yKey: 'roic',
+        zKey: 'inv_peg',
+        xLabel: 'EV/EBITDA',
+        yLabel: 'ROIC (%)',
+        zLabel: '1/PEG',
+      },
     },
-  },
-  {
-    id: 'regla40',
-    label: 'Regla del 40',
-    subtitle: 'para Growth / SaaS',
-    icon: <Target className="w-3.5 h-3.5" />,
-    cfg: {
-      xKey: 'sales_growth_yoy',
-      yKey: 'inv_pfcf',
-      zKey: 'market_cap_num',
-      xLabel: 'Sales Growth YoY (%)',
-      yLabel: '1/P•FCF',
-      zLabel: 'Market Cap',
+    {
+      id: 'regla40',
+      label: 'Regla del 40',
+      subtitle: 'para Growth / SaaS',
+      icon: <Target className="w-3.5 h-3.5" />,
+      cfg: {
+        xKey: 'sales_growth_yoy',
+        yKey: 'inv_pfcf',
+        zKey: 'market_cap_num',
+        xLabel: 'Sales Growth YoY (%)',
+        yLabel: '1/P•FCF',
+        zLabel: 'Market Cap',
+      },
     },
-  },
-];
+  ];
 
 function toComboAsset(
   asset: SelectedAsset | CompetitorAsset,
@@ -394,11 +404,10 @@ export default function CompetitorAnalysis({ targetAsset }: CompetitorAnalysisPr
                 <button
                   key={m.key}
                   onClick={() => setActiveLeftTab(m.key)}
-                  className={`px-4 py-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
-                    activeLeftTab === m.key
-                      ? 'text-[var(--holo-blue)] border-b-2 border-[var(--holo-blue)] bg-white/[0.02]'
-                      : 'text-gray-500 hover:text-gray-300'
-                  }`}
+                  className={`px-4 py-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all ${activeLeftTab === m.key
+                    ? 'text-[var(--holo-blue)] border-b-2 border-[var(--holo-blue)] bg-white/[0.02]'
+                    : 'text-gray-500 hover:text-gray-300'
+                    }`}
                 >
                   {m.label.split(' ')[0]}
                 </button>
@@ -433,11 +442,10 @@ export default function CompetitorAnalysis({ targetAsset }: CompetitorAnalysisPr
                 <button
                   key={t.id}
                   onClick={() => setActiveRightTab(t.id)}
-                  className={`flex items-center gap-1.5 px-4 py-3 text-[10px] font-bold uppercase tracking-wider transition-all ${
-                    activeRightTab === t.id
-                      ? 'text-[var(--holo-blue)] border-b-2 border-[var(--holo-blue)] bg-white/[0.02]'
-                      : 'text-gray-500 hover:text-gray-300'
-                  }`}
+                  className={`flex items-center gap-1.5 px-4 py-3 text-[10px] font-bold uppercase tracking-wider transition-all ${activeRightTab === t.id
+                    ? 'text-[var(--holo-blue)] border-b-2 border-[var(--holo-blue)] bg-white/[0.02]'
+                    : 'text-gray-500 hover:text-gray-300'
+                    }`}
                 >
                   {t.icon}
                   {t.label}
