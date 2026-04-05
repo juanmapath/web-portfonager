@@ -1,60 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { buildAnalysisPrompt } from './prompt';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
-
-function buildPrompt(data: {
-  company_name: string;
-  roic: string;
-  ev_ebitda: string;
-  oper_margin: string;
-  sales_growth_yoy: string;
-  sales_growth_qoq: string;
-}): string {
-  return `Contexto de Rol:
-Actúa como un Senior Quantitative Trader y Asset Manager con enfoque en "Factor Investing". Tu objetivo es realizar un análisis técnico-fundamental de ${data.company_name} para determinar su inclusión en una cartera de "Quality Growth".
-
-Inputs de Datos:
-ROIC: ${data.roic}
-EV/EBITDA: ${data.ev_ebitda}
-Operating Margin: ${data.oper_margin}
-Sales Growth YoY: ${data.sales_growth_yoy}
-Sales Growth QoQ: ${data.sales_growth_qoq}
-
-Instrucciones de Análisis:
-1. Evaluación de Calidad y Moat (Quality Factor): Analiza si el ROIC y el Operating Margin sugieren una ventaja competitiva estructural (Moat). ¿Es la eficiencia de capital superior a la media del sector?
-2. Binomio Crecimiento-Valoración (GARP Check): Cruza el EV/EBITDA con el Sales Growth YoY. ¿Estamos ante un crecimiento caro o una oportunidad infravalorada? Determina si existe potencial de crecimiento exponencial basándote en la escalabilidad de los márgenes.
-3. Análisis de Momentum y Aceleración: Compara el crecimiento YoY vs QoQ. Identifica si hay una aceleración en las ventas o si el crecimiento está estancándose (Growth Stall).
-4. Sensibilidad a Noticias y Sentimiento: Evalúa cómo las noticias recientes del sector y factores macro (tasas, inflación, supply chain) afectan la sensibilidad de estas métricas.
-5. Integridad de Earnings: Determina si estos valores son consistentes con la fecha del último reporte de ganancias. ¿Hay señales de que estas métricas puedan deteriorarse en el próximo trimestre basándote en el "guidance" general del mercado?
-
-Estructura de Salida (Markdown):
-# Informe de Análisis Quant: ${data.company_name}
-
-## 📊 1. Perfil de Factores (Scorecard)
-
-| Factor | Valor | Evaluación Quant |
-|---|---|---|
-| Calidad (ROIC) | ${data.roic} | [High/Mid/Low] |
-| Valoración (EV/EBITDA) | ${data.ev_ebitda} | [Cheap/Fair/Expensive] |
-| Crecimiento (Sales YoY) | ${data.sales_growth_yoy} | [Accelerating/Stable/Declining] |
-
-## 🔍 2. Tesis de Inversión
-**Análisis de Moat:** (Describe si la rentabilidad es sostenible).
-**Ventajas/Desventajas Competitivas:** (Comparativa rápida vs. industria).
-**Potencial Exponencial:** (Evaluación de escalabilidad).
-
-## ⚠️ 3. Escenario Bear & Riesgos
-Identifica los 2 casos "Bear" más críticos.
-Analiza la sensibilidad de las métricas ante noticias negativas recientes.
-
-## 📅 4. Coherencia con Earnings & News
-(Comentario sobre si las métricas reflejan el último reporte o si el mercado ya descontó nueva información).
-
-## 📈 5. Veredicto Final
-[CLASIFICACIÓN: TOP PICK / HOLD / AVOID]
-(Justifica si es apto para una cartera de Growth o si está sobrevaluado).`;
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -71,13 +19,19 @@ export async function POST(req: NextRequest) {
     };
 
     const m = body.raw_metrics || {};
-    const prompt = buildPrompt({
+    const prompt = buildAnalysisPrompt({
       company_name: body.company_name || 'Unknown Company',
       roic: m.roic || m.ROIC || 'N/A',
       ev_ebitda: m['EV/EBITDA'] || m.ev_ebitda || 'N/A',
       oper_margin: m.oper_margin || 'N/A',
+      oper_margin_avg: m.oper_margin_avg || m['Operating Margin Industry Avg'] || 'N/A',
       sales_growth_yoy: m.sales_growth_yoy || 'N/A',
       sales_growth_qoq: m.sales_growth_qoq || 'N/A',
+      sales_growth_qoq_avg: m.sales_growth_qoq_avg || m['Sales Growth QoQ industry Avg'] || 'N/A',
+      sales_growth_yoy_avg: m.sales_growth_yoy_avg || m['Sales Growth YoY industry Avg'] || 'N/A',
+      price_per_fcf: m.price_per_fcf || m['Price to FCF'] || m['P/FCF'] || 'N/A',
+      priceToFCF_avg: m.priceToFCF_avg || m['Price to FCF Industry Avg'] || 'N/A',
+      earnings_date: m.earnings_date || m['Earnings Date'] || 'N/A',
     });
 
     const response = await fetch(

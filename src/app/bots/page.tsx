@@ -277,9 +277,9 @@ export default function BotsPage() {
 
       {/* Aggregated Stats Section */}
       {aggregatedStats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-          <div className="cyber-card p-4 rounded-xl border-t-2 border-t-terminal-green/30 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-b from-terminal-green/[0.02] to-transparent pointer-events-none"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mt-8">
+          <div className="cyber-card p-4 rounded-xl border-t-2 border-t-sky-400/30 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-b from-sky-400/[0.02] to-transparent pointer-events-none"></div>
             <p className="text-[10px] text-gray-500 uppercase tracking-widest relative z-10">Capital</p>
             <div className="mt-1 relative z-10 font-mono">
               <p className="text-sky-400 text-lg md:text-xl font-bold">
@@ -295,32 +295,33 @@ export default function BotsPage() {
               </div>
             </div>
           </div>
-          <div className="cyber-card p-4 rounded-xl border-t-2 border-t-terminal-green/30 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-b from-terminal-green/[0.02] to-transparent pointer-events-none"></div>
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest relative z-10">Invertido</p>
-            <p className="font-mono text-white text-xl mt-1 relative z-10">
-              ${aggregatedStats.total_capital_added.toLocaleString()}
-            </p>
-          </div>
-          <div className="cyber-card p-4 rounded-xl border-t-2 border-t-terminal-green/30 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-b from-terminal-green/[0.02] to-transparent pointer-events-none"></div>
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest relative z-10">PNL</p>
-            <p className={`font-mono text-xl mt-1 relative z-10 ${(aggregatedStats.pnl_un_sum + aggregatedStats.PNL_sum) >= 0 ? 'text-terminal-green' : 'text-red-500'}`}>
-              {(aggregatedStats.pnl_un_sum + aggregatedStats.PNL_sum) >= 0 ? '+' : ''}{(aggregatedStats.pnl_un_sum + aggregatedStats.PNL_sum).toLocaleString()}
-            </p>
-          </div>
-          <div className="cyber-card p-4 rounded-xl border-t-2 border-t-terminal-green/30 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-b from-terminal-green/[0.02] to-transparent pointer-events-none"></div>
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest relative z-10">Rets</p>
-            <p className={`font-mono text-xl mt-1 relative z-10 ${
-              aggregatedStats.total_capital_added > 0 
-                ? (((aggregatedStats.pnl_un_sum + aggregatedStats.PNL_sum) / aggregatedStats.total_capital_added) >= 0 ? 'text-terminal-green' : 'text-red-500')
-                : 'text-gray-400'
-            }`}>
-              {aggregatedStats.total_capital_added > 0 
-                ? `${(((aggregatedStats.pnl_un_sum + aggregatedStats.PNL_sum) / aggregatedStats.total_capital_added) * 100).toFixed(2)}%` 
-                : '0.00%'}
-            </p>
+          <div className="cyber-card p-4 rounded-xl border-t-2 border-t-sky-400/30 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-b from-sky-400/[0.02] to-transparent pointer-events-none"></div>
+            <div className="flex justify-between items-start relative z-10">
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Invertido</p>
+                <p className="font-mono text-white text-xl mt-1">
+                  ${aggregatedStats.total_capital_added.toLocaleString()}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest">PNL</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <p className={`font-mono text-xl ${(aggregatedStats.pnl_un_sum + aggregatedStats.PNL_sum) >= 0 ? 'text-terminal-green' : 'text-red-500'}`}>
+                    {(aggregatedStats.pnl_un_sum + aggregatedStats.PNL_sum) >= 0 ? '+' : ''}{(aggregatedStats.pnl_un_sum + aggregatedStats.PNL_sum).toLocaleString()}
+                  </p>
+                  <p className={`font-mono text-xs ${
+                    aggregatedStats.total_capital_added > 0 
+                      ? (((aggregatedStats.pnl_un_sum + aggregatedStats.PNL_sum) / aggregatedStats.total_capital_added) >= 0 ? 'text-terminal-green' : 'text-red-500')
+                      : 'text-gray-400'
+                  }`}>
+                    ({aggregatedStats.total_capital_added > 0 
+                      ? `${(((aggregatedStats.pnl_un_sum + aggregatedStats.PNL_sum) / aggregatedStats.total_capital_added) * 100).toFixed(2)}%` 
+                      : '0.00%'})
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -353,9 +354,12 @@ export default function BotsPage() {
                 <div className="absolute inset-0 bg-gradient-to-b from-terminal-green/[0.03] to-transparent pointer-events-none transition-opacity duration-300"></div>
                 
                 <div className="flex justify-between items-start mb-4 relative z-10 hover:text-terminal-green transition-colors">
-                  <div>
-                    <h3 className="text-xl font-bold text-white tracking-widest group-hover:text-terminal-green transition-colors">{asset.asset}</h3>
-                    <p className="text-xs text-terminal-green font-mono mt-1 hover:brightness-125 transition-all">{asset.bot_name}</p>
+                  <div className="flex flex-col">
+                    <div className="flex items-baseline gap-2">
+                      <h3 className="text-xl font-bold text-white tracking-widest group-hover:text-terminal-green transition-colors">{asset.asset}</h3>
+                      <span className="text-xs font-mono text-gray-500 font-medium">${asset.last_price?.toLocaleString() ?? 0}</span>
+                    </div>
+                    <p className="text-xs text-terminal-green font-mono mt-0.5 hover:brightness-125 transition-all">{asset.bot_name}</p>
                   </div>
                   <div className="flex flex-col items-end">
                      <div className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider mb-2 ${asset.operate ? 'bg-terminal-green/20 text-terminal-green border border-terminal-green/30' : 'bg-red-500/20 text-red-500 border border-red-500/30'}`}>
@@ -395,12 +399,12 @@ export default function BotsPage() {
                   <div className="mt-6 pt-6 border-t border-dashed border-white/20 relative z-10 animate-in fade-in slide-in-from-top-4 duration-300">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-4 px-2 sm:px-0">
                       <div>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Last Price</p>
-                        <p className="font-mono text-white text-sm mt-1">${asset.last_price?.toLocaleString() ?? 0}</p>
-                      </div>
-                      <div>
                         <p className="text-[10px] text-gray-500 uppercase tracking-widest">Op Price</p>
                         <p className="font-mono text-white text-sm mt-1">${asset.op_price?.toLocaleString() ?? 0}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Pend To Add</p>
+                        <p className="font-mono text-white text-sm mt-1">${asset.cap_to_add?.toLocaleString() ?? 0}</p>
                       </div>
                       <div>
                         <p className="text-[10px] text-gray-500 uppercase tracking-widest">Cap Added</p>

@@ -43,6 +43,7 @@ interface ComboAsset {
   market_cap_num: number;
   inv_pfcf: number;
   inv_peg: number;
+  fcf_margin: number;
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -154,10 +155,12 @@ function BubbleChart({
   data,
   cfg,
   targetTicker,
+  isRuleOf40 = false,
 }: {
   data: ComboAsset[];
   cfg: ScatterTabConfig;
   targetTicker: string;
+  isRuleOf40?: boolean;
 }) {
   const valid = data.filter(
     a =>
@@ -226,15 +229,41 @@ function BubbleChart({
                     {cfg.xLabel}: {(d[cfg.xKey] as number).toFixed(2)}
                   </p>
                   <p className="text-purple-400">
-                    {cfg.yLabel}: {(d[cfg.yKey] as number).toFixed(2)}
+                    {cfg.yLabel}: {(d[cfg.yKey] as number).toFixed(2)}%
                   </p>
                   <p className="text-yellow-400">
                     {cfg.zLabel}: {(d[cfg.zKey] as number).toFixed(3)}
                   </p>
+                  {isRuleOf40 && (
+                    <div className="mt-2 pt-2 border-t border-white/10 flex justify-between items-center">
+                      <span className="text-[10px] text-gray-500 uppercase">R40 Score:</span>
+                      <span className={`mono font-bold ${(d.sales_growth_yoy + d.fcf_margin) >= 40 ? 'text-green-400' : 'text-red-400'}`}>
+                        {(d.sales_growth_yoy + d.fcf_margin).toFixed(1)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             }}
           />
+          
+          {isRuleOf40 && (
+            <Scatter
+              name="Rule of 40"
+              data={[
+                { sales_growth_yoy: -20, fcf_margin: 60 },
+                { sales_growth_yoy: 0, fcf_margin: 40 },
+                { sales_growth_yoy: 40, fcf_margin: 0 },
+                { sales_growth_yoy: 70, fcf_margin: -30 }
+              ]}
+              line={{ stroke: '#ef4444', strokeWidth: 2, strokeDasharray: '5 5' }}
+              lineType="fitting"
+              shape={() => null}
+              legendType="none"
+              tooltipType="none"
+            />
+          )}
+
           <Scatter name="Competitors" data={valid}>
             {valid.map((entry, i) => (
               <Cell
@@ -307,10 +336,10 @@ const RIGHT_TABS: {
       icon: <Target className="w-3.5 h-3.5" />,
       cfg: {
         xKey: 'sales_growth_yoy',
-        yKey: 'inv_pfcf',
+        yKey: 'fcf_margin',
         zKey: 'market_cap_num',
         xLabel: 'Sales Growth YoY (%)',
-        yLabel: '1/P•FCF',
+        yLabel: 'FCF Margin (%)',
         zLabel: 'Market Cap',
       },
     },
@@ -328,6 +357,9 @@ function toComboAsset(
   const evEbitda = parseMetric(m['EV/EBITDA'] || m['ev/ebitda'] || m.ev_ebitda);
   // market_cap comes as a field on SelectedAsset but also lives in raw_metrics for competitors
   const marketCap = marketCapStr || m.marketCap || m.market_cap || m['Market Cap'];
+  const ps = parseMetric(m.price_per_sales);
+  const fcfMargin = (pfcf > 0 && ps > 0) ? (ps / pfcf) * 100 : 0;
+
   return {
     ticker: asset.ticker || '',
     company_name: asset.company_name || '',
@@ -341,6 +373,7 @@ function toComboAsset(
     market_cap_num: parseMarketCap(marketCap),
     inv_pfcf: pfcf > 0 ? 1 / pfcf : 0,
     inv_peg: peg > 0 ? 1 / peg : 0,
+    fcf_margin: fcfMargin,
   };
 }
 
@@ -464,6 +497,7 @@ export default function CompetitorAnalysis({ targetAsset }: CompetitorAnalysisPr
                 data={combined}
                 cfg={currentRightTab.cfg}
                 targetTicker={targetAsset.ticker}
+                isRuleOf40={activeRightTab === 'regla40'}
               />
             </div>
 
