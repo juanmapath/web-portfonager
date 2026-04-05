@@ -121,7 +121,21 @@ export const apiProftviewClient = {
   },
 
   async addAssetCapital(data: { bot_asset_id: number; amount: number }): Promise<unknown> {
-    const res = await fetch(`${BASE_URL}/assets/add-capital/`, {
+    const res = await fetch(`${BASE_URL}/assets/add-remove-capital/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const dataRes: unknown = await res.json();
+    return dataRes;
+  },
+
+  async closePosition(data: { bot_asset_id: number; all_quantity: boolean; execution_price: number; quantity_closed?: number }): Promise<unknown> {
+    const res = await fetch(`${BASE_URL}/assets/close-position/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

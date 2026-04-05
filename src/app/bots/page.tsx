@@ -35,6 +35,12 @@ export default function BotsPage() {
   const [modalAssetId, setModalAssetId] = useState<number | null>(null);
   const [modalAssetAmount, setModalAssetAmount] = useState<string>('');
 
+  // Close Position Modal states
+  const [isClosePositionModalOpen, setIsClosePositionModalOpen] = useState(false);
+  const [closeAllQuantity, setCloseAllQuantity] = useState(true);
+  const [closeExecutionPrice, setCloseExecutionPrice] = useState<string>('');
+  const [closeQuantity, setCloseQuantity] = useState<string>('');
+
   // Load initial data
   useEffect(() => {
     async function initData() {
@@ -171,6 +177,41 @@ export default function BotsPage() {
     }
   };
 
+  const handleClosePosition = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!modalAssetId || !closeExecutionPrice) return;
+    if (!closeAllQuantity && !closeQuantity) return;
+    
+    setIsSubmitting(true);
+    try {
+      await apiProftviewClient.closePosition({
+        bot_asset_id: modalAssetId,
+        all_quantity: closeAllQuantity,
+        execution_price: Number(closeExecutionPrice),
+        ...(closeAllQuantity ? {} : { quantity_closed: Number(closeQuantity) })
+      });
+      
+      setIsClosePositionModalOpen(false);
+      setModalAssetId(null);
+      setCloseExecutionPrice('');
+      setCloseQuantity('');
+      setCloseAllQuantity(true);
+      
+      const [assetsRes, statsRes] = await Promise.all([
+        apiProftviewClient.getAssets(selectedBot ? { bot: selectedBot } : selectedFamily ? { family: selectedFamily } : undefined),
+        apiProftviewClient.getAggregatedAssets(selectedBot ? { bot: selectedBot } : selectedFamily ? { family: selectedFamily } : undefined)
+      ]);
+      setAssets(assetsRes);
+      setAggregatedStats(statsRes);
+      
+    } catch (error) {
+      console.error("Error closing position", error);
+      alert("Error closing position. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleFamilyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     setSelectedFamily(val ? Number(val) : null);
@@ -211,10 +252,6 @@ export default function BotsPage() {
               >
                 <Terminal size={14} />
                 Add/Withdraw Capital to Bot
-              </button>
-              <button className="flex-1 xl:flex-none px-5 py-3 border border-terminal-green/50 text-terminal-green font-extrabold text-[10px] uppercase tracking-widest hover:bg-terminal-green/10 transition-colors rounded-sm flex items-center justify-center gap-2">
-                <Plus size={14} />
-                Add Asset
               </button>
             </>
           ) : (
@@ -453,13 +490,19 @@ export default function BotsPage() {
                             <XCircle size={14} />
                             Remove Capital
                           </button>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); }}
-                            className="flex-1 sm:flex-none px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/50 hover:bg-red-500 hover:text-white transition-colors rounded-sm text-[10px] font-extrabold uppercase tracking-widest flex items-center justify-center gap-2"
-                          >
-                            <Terminal size={14} />
-                            Close Positions
-                          </button>
+                          {(asset.qty_open ?? 0) > 0 && (
+                            <button 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                setModalAssetId(asset.id);
+                                setIsClosePositionModalOpen(true);
+                              }}
+                              className="flex-1 sm:flex-none px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/50 hover:bg-red-500 hover:text-white transition-colors rounded-sm text-[10px] font-extrabold uppercase tracking-widest flex items-center justify-center gap-2"
+                            >
+                              <Terminal size={14} />
+                              Close Positions
+                            </button>
+                          )}
                         </>
                       ) : (
                         <div className="flex items-center gap-2 px-4 py-2 bg-void border border-white/5 rounded-sm">
@@ -719,6 +762,114 @@ export default function BotsPage() {
                     <>
                       {assetModalMode === 'add' ? <Plus size={16} strokeWidth={3} /> : <XCircle size={16} strokeWidth={3} />}
                       {assetModalMode === 'add' ? 'Add' : 'Remove'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Close Position Modal */}
+      {isClosePositionModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+            onClick={() => !isSubmitting && setIsClosePositionModalOpen(false)}
+          ></div>
+          
+          <div className="cyber-card w-full max-w-md p-8 rounded-2xl border-t-4 border-t-red-500 relative z-10 animate-in zoom-in-95 duration-200 shadow-[0_0_50px_rgba(239,68,68,0.3)]">
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h2 className="text-2xl font-black text-white tracking-tight uppercase">Close Position</h2>
+                <p className="text-[10px] text-red-500 font-mono uppercase tracking-[0.2em] mt-1">Trading Action</p>
+              </div>
+              <button 
+                onClick={() => setIsClosePositionModalOpen(false)}
+                disabled={isSubmitting}
+                className="text-gray-500 hover:text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleClosePosition} className="space-y-6">
+              <div className="space-y-2 relative">
+                <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1">Asset</label>
+                <div className="w-full bg-void border border-white/5 text-white/50 px-4 py-3 rounded-xl font-mono text-sm cursor-not-allowed">
+                  {selectedModalAsset ? `${selectedModalAsset.asset} - ${selectedModalAsset.bot_name}` : 'N/A'}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-10 h-6 rounded-full transition-colors relative ${closeAllQuantity ? 'bg-red-500' : 'bg-gray-600'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${closeAllQuantity ? 'left-5' : 'left-1'}`}></div>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    className="hidden"
+                    checked={closeAllQuantity}
+                    onChange={(e) => setCloseAllQuantity(e.target.checked)}
+                  />
+                  <span className="text-[10px] text-white uppercase tracking-widest font-bold group-hover:text-red-400 transition-colors">
+                    Close Total
+                  </span>
+                </label>
+              </div>
+
+              {!closeAllQuantity && (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1">Quantity Closed</label>
+                  <input 
+                    required
+                    type="number"
+                    step="any"
+                    min="0"
+                    value={closeQuantity}
+                    onChange={(e) => setCloseQuantity(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full bg-void border border-white/10 text-white px-4 py-3 rounded-xl outline-none focus:border-red-500 transition-colors font-mono text-sm"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1">Execution Price</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-red-500 font-mono">$</span>
+                  <input 
+                    required
+                    type="number"
+                    step="any"
+                    value={closeExecutionPrice}
+                    onChange={(e) => setCloseExecutionPrice(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full bg-void border border-white/10 text-white pl-8 pr-4 py-3 rounded-xl outline-none focus:border-red-500 transition-colors font-mono text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-4">
+                <button 
+                  type="button"
+                  onClick={() => setIsClosePositionModalOpen(false)}
+                  disabled={isSubmitting}
+                  className="flex-1 px-6 py-4 border border-white/10 text-white font-black text-xs uppercase tracking-widest hover:bg-white/5 transition-colors rounded-xl disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 px-6 py-4 bg-red-500 text-white font-black text-xs uppercase tracking-widest hover:opacity-90 transition-colors rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 shadow-[0_4px_20px_rgba(239,68,68,0.2)]"
+                >
+                  {isSubmitting ? (
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    <>
+                      <Terminal size={16} strokeWidth={3} />
+                      Execute
                     </>
                   )}
                 </button>
