@@ -19,7 +19,7 @@ import { PortfolioHistory } from "@/app/api/types";
 
 export function PortfolioHistoryChart() {
   const [data, setData] = useState<PortfolioHistory[]>([]);
-  const [activeTab, setActiveTab] = useState<"capital" | "returns">("capital");
+  const [activeTab, setActiveTab] = useState<"capital" | "returns">("returns");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -140,6 +140,7 @@ export function PortfolioHistoryChart() {
                 <YAxis
                   axisLine={false}
                   tickLine={false}
+                  domain={['auto', 'auto']}
                   tick={{ fill: '#4b5563', fontSize: 9, fontFamily: 'monospace' }}
                   tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
                 />

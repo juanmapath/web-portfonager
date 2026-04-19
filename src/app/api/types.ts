@@ -129,3 +129,83 @@ export interface CompetitorAsset {
   raw_metrics: Record<string, string>;
   target_asset: number;
 }
+
+export interface BacktestMetrics {
+  start: string;
+  end: string;
+  BH_rets?: number;
+  BH_rets_EA?: number;
+  BH_max_dd?: number;
+  ST_rets?: number;
+  ST_rets_EA?: number;
+  CAGR?: number;
+  max_dd?: number;
+  profit_factor?: number;
+  prof_fact?: number;
+  no_trds?: number;
+  prof_trds?: number;
+  adj_rets?: number;
+  'wns/ls'?: number;
+  [key: string]: any;
+}
+
+export interface BacktestBootstrap {
+  confidence_interaval_30: number[];
+  estadisticas_bootstrap_ci?: number[];
+  estadisticas_bootstrap_h0?: number[];
+  statistic_of_back_test: number;
+  valor_critico?: number;
+  media_h0?: number;
+  [key: string]: any;
+}
+
+export interface BacktestDistributions {
+  longs_rets?: number[];
+  short_rets?: number[];
+  days_inside?: number[];
+  bootstrap?: BacktestBootstrap;
+  [key: string]: any;
+}
+
+export interface BacktestResult {
+  id: number;
+  bot_asset: number;
+  period: string;
+  created_at: string;
+  metrics: BacktestMetrics;
+  distributions: BacktestDistributions;
+  equity_curve: {
+    Date: string[];
+    cum_returns_st: number[];
+  };
+  bh_curve: {
+    Date: string[];
+    BH_rets: number[];
+  };
+  drawdown_curve: {
+    Date: string[];
+    drawdown: number[];
+  };
+}
+
+export interface AssetBotPercentage {
+  bot_asset_id: number | null;
+  asset: string;
+  bot_name: string;
+  value: number;
+  percentage: number;
+}
+
+export interface BotPercentage {
+  bot_id: number;
+  bot_name: string;
+  value: number;
+  cash_included: number;
+  percentage: number;
+}
+
+export interface PortfolioPercentages {
+  total_portfolio_value: number;
+  asset_bot_percentages: AssetBotPercentage[];
+  bot_percentages: BotPercentage[];
+}

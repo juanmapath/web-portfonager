@@ -5,6 +5,7 @@ import { Terminal, Activity, TrendingUp, Zap, LogOut } from "lucide-react";
 import { useAuth } from "@/app/api/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import { PortfolioHistoryChart } from "@/components/PortfolioHistoryChart";
+import { PortfolioDistributionCharts } from "@/components/PortfolioDistributionCharts";
 
 
 export default function DashboardPage() {
@@ -55,6 +56,11 @@ export default function DashboardPage() {
       {/* Portfolio History Chart Section */}
       <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
         <PortfolioHistoryChart />
+      </section>
+
+      {/* Portfolio Distribution Section */}
+      <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+        <PortfolioDistributionCharts />
       </section>
 
       {/* Main Stats Grid */}

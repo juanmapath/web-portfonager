@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Family, Bot, Broker, BotAsset } from '../app/api/types';
+import { Family, Bot, Broker, BotAsset, PortfolioPercentages } from '../app/api/types';
 import { apiProftviewClient } from '../app/api/client';
 
 interface ProftviewState {
@@ -7,6 +7,7 @@ interface ProftviewState {
   bots: Bot[];
   brokers: Broker[];
   assets: BotAsset[];
+  portfolioPercentages: PortfolioPercentages | null;
   isLoading: boolean;
   error: string | null;
 
@@ -14,6 +15,7 @@ interface ProftviewState {
   fetchBots: () => Promise<void>;
   fetchBrokers: () => Promise<void>;
   fetchAssets: (params?: { family?: number; bot?: number; broker?: number }) => Promise<void>;
+  fetchPortfolioPercentages: () => Promise<void>;
   fetchAll: () => Promise<void>;
 }
 
@@ -22,6 +24,7 @@ export const useProftviewStore = create<ProftviewState>((set) => ({
   bots: [],
   brokers: [],
   assets: [],
+  portfolioPercentages: null,
   isLoading: false,
   error: null,
 
@@ -69,16 +72,28 @@ export const useProftviewStore = create<ProftviewState>((set) => ({
     }
   },
 
+  fetchPortfolioPercentages: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const portfolioPercentages = await apiProftviewClient.getPortfolioPercentages();
+      set({ portfolioPercentages, isLoading: false });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error fetching portfolio percentages';
+      set({ error: message, isLoading: false });
+    }
+  },
+
   fetchAll: async () => {
     set({ isLoading: true, error: null });
     try {
-      const [families, bots, brokers, assets] = await Promise.all([
+      const [families, bots, brokers, assets, portfolioPercentages] = await Promise.all([
         apiProftviewClient.getFamilies(),
         apiProftviewClient.getBots(),
         apiProftviewClient.getBrokers(),
-        apiProftviewClient.getAssets()
+        apiProftviewClient.getAssets(),
+        apiProftviewClient.getPortfolioPercentages()
       ]);
-      set({ families, bots, brokers, assets, isLoading: false });
+      set({ families, bots, brokers, assets, portfolioPercentages, isLoading: false });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Error fetching all data';
       set({ error: message, isLoading: false });

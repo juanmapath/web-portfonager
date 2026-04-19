@@ -1,4 +1,4 @@
-import { Family, Bot, Broker, BotAsset, AggregatedStats, PortfolioHistory, Tactic, SelectedAsset, CompetitorAsset } from './types';
+import { Family, Bot, Broker, BotAsset, AggregatedStats, PortfolioHistory, Tactic, SelectedAsset, CompetitorAsset, PortfolioPercentages } from './types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_PROFTVIEW_API_URL || 'http://localhost:8000/api/proftview';
 
@@ -157,6 +157,13 @@ export const apiProftviewClient = {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data: unknown = await res.json();
     return data as PortfolioHistory[];
+  },
+
+  async getPortfolioPercentages(): Promise<PortfolioPercentages> {
+    const res = await fetch(`${BASE_URL}/portfolio-percentages/`);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data: unknown = await res.json();
+    return data as PortfolioPercentages;
   }
 };
 
@@ -182,5 +189,23 @@ export const apiGemsfinderClient = {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data: unknown = await res.json();
     return data as CompetitorAsset[];
+  }
+};
+
+const BACKTEST_BASE_URL = process.env.NEXT_PUBLIC_BACKTEST_API_URL || 'http://localhost:8000/api/backtestlab';
+
+export const apiBacktestClient = {
+  async getResults(botAssetId: number, period: string = '1y') {
+    const res = await fetch(`${BACKTEST_BASE_URL}/results/?bot_asset=${botAssetId}&period=${period}`);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data = await res.json();
+    // The API might return a list of results if filtered, or paginated data.
+    // Usually a filter returns a list. If it's a list, return the first one.
+    if (Array.isArray(data) && data.length > 0) {
+        return data[0];
+    } else if (data && data.results && Array.isArray(data.results) && data.results.length > 0) {
+        return data.results[0];
+    }
+    return null; // Return null instead of [] if empty
   }
 };
