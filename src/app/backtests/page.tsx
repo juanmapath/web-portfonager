@@ -212,44 +212,44 @@ export default function BacktestsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                   <div className="cyber-card p-4 rounded-xl border-t-2 border-t-sky-400/50">
                     <p className="text-[10px] text-gray-500 font-mono uppercase tracking-widest flex items-center gap-1.5"><ArrowUpRight size={12}/> CAGR</p>
-                    <p className={`text-xl font-mono font-bold mt-2 ${result?.metrics?.CAGR && result.metrics.CAGR >= 0 ? 'text-terminal-green' : 'text-red-500'}`}>
+                    <p className={`text-xl font-mono font-bold mt-2 ${result?.metrics?.CAGR !== undefined && result.metrics.CAGR >= 0 ? 'text-terminal-green' : 'text-red-500'}`}>
                       {result?.metrics?.CAGR !== undefined ? `${result.metrics.CAGR.toFixed(2)}%` : 'N/A'}
                     </p>
                     {result?.metrics?.BH_rets_EA !== undefined && (
-                      <p className="text-[9px] font-mono text-gray-500 mt-1 uppercase">BH: {result.metrics.BH_rets_EA.toFixed(2)}%</p>
+                      <p className="text-[9px] font-mono text-gray-500 mt-1 uppercase">BH: {result?.metrics?.BH_rets_EA?.toFixed(2)}%</p>
                     )}
                   </div>
                   <div className="cyber-card p-4 rounded-xl border-t-2 border-t-red-500/50">
                     <p className="text-[10px] text-gray-500 font-mono uppercase tracking-widest flex items-center gap-1.5"><ShieldAlert size={12}/> Max DD</p>
                     <p className="text-xl text-white font-mono font-bold mt-2">
-                      {result?.metrics?.max_dd !== undefined ? `${result.metrics.max_dd.toFixed(2)}%` : 'N/A'}
+                      {result?.metrics?.max_dd !== undefined ? `${result?.metrics?.max_dd?.toFixed(2)}%` : 'N/A'}
                     </p>
                     {result?.metrics?.BH_max_dd !== undefined && (
-                      <p className="text-[9px] font-mono text-gray-500 mt-1 uppercase">BH: {result.metrics.BH_max_dd.toFixed(2)}%</p>
+                      <p className="text-[9px] font-mono text-gray-500 mt-1 uppercase">BH: {result?.metrics?.BH_max_dd?.toFixed(2)}%</p>
                     )}
                   </div>
                   <div className="cyber-card p-4 rounded-xl border-t-2 border-t-purple-500/50">
                     <p className="text-[10px] text-gray-500 font-mono uppercase tracking-widest flex items-center gap-1.5"><Target size={12}/> Profit Factor</p>
                     <p className="text-xl text-white font-mono font-bold mt-2">
-                      {result?.metrics?.prof_fact !== undefined ? result.metrics.prof_fact.toFixed(2) : 'N/A'}
+                      {result?.metrics?.prof_fact !== undefined ? result?.metrics?.prof_fact?.toFixed(2) : 'N/A'}
                     </p>
                   </div>
                   <div className="cyber-card p-4 rounded-xl border-t-2 border-t-terminal-green/50">
                     <p className="text-[10px] text-gray-500 font-mono uppercase tracking-widest flex items-center gap-1.5"><Activity size={12}/> Win Rate</p>
                     <p className="text-xl text-white font-mono font-bold mt-2">
-                      {result?.metrics?.prof_trds !== undefined ? `${result.metrics.prof_trds.toFixed(1)}%` : 'N/A'}
+                      {result?.metrics?.prof_trds !== undefined ? `${result?.metrics?.prof_trds?.toFixed(1)}%` : 'N/A'}
                     </p>
                   </div>
                   <div className="cyber-card p-4 rounded-xl border-t-2 border-t-blue-500/50">
                     <p className="text-[10px] text-gray-500 font-mono uppercase tracking-widest flex items-center gap-1.5"><TrendingUp size={12}/> Win/Loss</p>
                     <p className="text-xl text-white font-mono font-bold mt-2">
-                      {result?.metrics?.['wns/ls'] !== undefined ? result.metrics['wns/ls'].toFixed(2) : 'N/A'}
+                      {result?.metrics?.['wns/ls'] !== undefined ? result?.metrics?.['wns/ls']?.toFixed(2) : 'N/A'}
                     </p>
                   </div>
                   <div className="cyber-card p-4 rounded-xl border-t-2 border-t-amber-500/50">
                     <p className="text-[10px] text-gray-500 font-mono uppercase tracking-widest flex items-center gap-1.5"><Calendar size={12}/> Trades</p>
                     <p className="text-xl text-white font-mono font-bold mt-2">
-                      {result?.metrics?.no_trds !== undefined ? result.metrics.no_trds : 'N/A'}
+                      {result?.metrics?.no_trds !== undefined ? result?.metrics?.no_trds : 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -271,7 +271,7 @@ export default function BacktestsPage() {
                             contentStyle={{ backgroundColor: '#0A0A0A', borderColor: '#333', borderRadius: '8px' }}
                             itemStyle={{ fontFamily: 'monospace', fontSize: '12px' }}
                             labelStyle={{ color: '#888', marginBottom: '4px', fontSize: '10px' }}
-                            formatter={(value: number) => [`${(value * 100).toFixed(2)}%`]}
+                            formatter={(value: any) => [`${(Number(value) * 100).toFixed(2)}%`]}
                           />
                           <Legend wrapperStyle={{ fontSize: '10px', fontFamily: 'monospace' }} />
                           <Line type="monotone" dataKey="Strategy" stroke="#00FF94" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#00FF94' }} />
@@ -296,7 +296,7 @@ export default function BacktestsPage() {
                             contentStyle={{ backgroundColor: '#0A0A0A', borderColor: '#333', borderRadius: '8px' }}
                             itemStyle={{ fontFamily: 'monospace', fontSize: '12px', color: '#ef4444' }}
                             labelStyle={{ color: '#888', marginBottom: '4px', fontSize: '10px' }}
-                            formatter={(value: number) => [`${value.toFixed(2)}%`, 'Drawdown']}
+                            formatter={(value: any) => [`${Number(value).toFixed(2)}%`, 'Drawdown']}
                           />
                           <Area type="monotone" dataKey="Drawdown" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} />
                         </AreaChart>
@@ -321,7 +321,7 @@ export default function BacktestsPage() {
                             contentStyle={{ backgroundColor: '#0A0A0A', borderColor: '#333', borderRadius: '8px' }}
                             itemStyle={{ fontFamily: 'monospace', fontSize: '12px', color: '#00D4FF' }}
                             labelStyle={{ color: '#888', fontSize: '10px' }}
-                            formatter={(value: number) => [value, 'Count']}
+                            formatter={(value: any) => [value, 'Count']}
                             labelFormatter={(val) => `Value: ${Number(val).toFixed(2)}`}
                           />
                           <Bar dataKey="count" fill="#00D4FF" radius={[2, 2, 0, 0]} />
@@ -347,7 +347,7 @@ export default function BacktestsPage() {
                             contentStyle={{ backgroundColor: '#0A0A0A', borderColor: '#333', borderRadius: '8px' }}
                             itemStyle={{ fontFamily: 'monospace', fontSize: '12px', color: '#7B61FF' }}
                             labelStyle={{ color: '#888', fontSize: '10px' }}
-                            formatter={(value: number) => [value, 'Freq']}
+                            formatter={(value: any) => [value, 'Freq']}
                             labelFormatter={(val) => `Value: ${Number(val).toFixed(2)}`}
                           />
                           <Bar dataKey="count" fill="#7B61FF" opacity={0.6} radius={[2, 2, 0, 0]} />
@@ -387,7 +387,7 @@ export default function BacktestsPage() {
                             contentStyle={{ backgroundColor: '#0A0A0A', borderColor: '#333', borderRadius: '8px' }}
                             itemStyle={{ fontFamily: 'monospace', fontSize: '12px', color: '#f59e0b' }}
                             labelStyle={{ color: '#888', fontSize: '10px' }}
-                            formatter={(value: number) => [value, 'Count']}
+                            formatter={(value: any) => [value, 'Count']}
                             labelFormatter={(val) => `Days: ${Number(val).toFixed(0)}`}
                           />
                           <Bar dataKey="count" fill="#f59e0b" radius={[2, 2, 0, 0]} />

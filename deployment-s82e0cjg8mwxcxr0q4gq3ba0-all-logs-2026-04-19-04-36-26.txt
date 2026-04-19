@@ -1,0 +1,296 @@
+2026-Apr-19 04:33:37.217325 Docker 29.1.5 with BuildKit and Buildx detected on deployment server (localhost).
+2026-Apr-19 04:33:37.229837 Starting deployment of juanmapath/web-portfonager:main to localhost.
+2026-Apr-19 04:33:37.499406 Preparing container with helper image: ghcr.io/coollabsio/coolify-helper:1.0.12
+2026-Apr-19 04:33:37.662888 [DEBUG] [CMD]: docker stop -t 30 s82e0cjg8mwxcxr0q4gq3ba0
+2026-Apr-19 04:33:37.662888 [DEBUG] Error response from daemon: No such container: s82e0cjg8mwxcxr0q4gq3ba0
+2026-Apr-19 04:33:37.916072 [DEBUG] [CMD]: docker run -d --network coolify --name s82e0cjg8mwxcxr0q4gq3ba0  --rm -v /var/run/docker.sock:/var/run/docker.sock ghcr.io/coollabsio/coolify-helper:1.0.12
+2026-Apr-19 04:33:37.916072 [DEBUG] ec6d9b430c0b8a559323d86af2bd0ec736c2860a536169d684d33eec289b4c36
+2026-Apr-19 04:33:39.153149 [DEBUG] [CMD]: docker exec s82e0cjg8mwxcxr0q4gq3ba0 bash -c 'GIT_SSH_COMMAND="ssh -o ConnectTimeout=30 -p 22 -o Port=22 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git ls-remote https://github.com/juanmapath/web-portfonager refs/heads/main'
+2026-Apr-19 04:<REDACTED>@\(.*\):#https://\1/#g" '\''/artifacts/s82e0cjg8mwxcxr0q4gq3ba0'\''/.gitmodules || true && git submodule sync && GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git submodule update --init --recursive --depth=1; fi && cd '\''/artifacts/s82e0cjg8mwxcxr0q4gq3ba0'\'' && GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git lfs pull'
+2026-Apr-19 04:<REDACTED>@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-Apr-19 04:33:47.148780 [DEBUG] #5 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 0.0s done
+2026-Apr-19 04:33:47.433549 [DEBUG] #5 ...
+2026-Apr-19 04:33:47.433549 [DEBUG] 
+2026-Apr-19 04:33:47.433549 [DEBUG] #4 [internal] load build context
+2026-Apr-19 04:33:47.433549 [DEBUG] #4 transferring context: 470.98kB 0.0s done
+2026-Apr-19 04:33:47.433549 [DEBUG] #4 DONE 0.1s
+2026-Apr-19 04:33:47.433549 [DEBUG] 
+2026-Apr-19 04:33:47.433549 [DEBUG] #5 [deps 1/5] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-Apr-19 04:33:47.446592 [DEBUG] #5 sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 0B / 445B 0.2s
+2026-Apr-19 04:33:47.599345 [DEBUG] #5 sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 0B / 1.26MB 0.2s
+2026-Apr-19 04:33:47.599345 [DEBUG] #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 0B / 43.23MB 0.2s
+2026-Apr-19 04:33:47.599345 [DEBUG] #5 sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 0B / 3.86MB 0.2s
+2026-Apr-19 04:33:47.752770 [DEBUG] #5 sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 445B / 445B 0.3s done
+2026-Apr-19 04:33:47.882210 [DEBUG] #5 sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 1.26MB / 1.26MB 0.6s done
+2026-Apr-19 04:33:48.065344 [DEBUG] #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 7.34MB / 43.23MB 0.8s
+2026-Apr-19 04:33:48.206334 [DEBUG] #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 13.63MB / 43.23MB 0.9s
+2026-Apr-19 04:33:48.206334 [DEBUG] #5 sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 3.86MB / 3.86MB 0.7s done
+2026-Apr-19 04:33:48.206334 [DEBUG] #5 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb
+2026-Apr-19 04:33:48.356471 [DEBUG] #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 22.02MB / 43.23MB 1.1s
+2026-Apr-19 04:33:48.513068 [DEBUG] #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 29.36MB / 43.23MB 1.2s
+2026-Apr-19 04:33:48.513068 [DEBUG] #5 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 0.3s done
+2026-Apr-19 04:33:48.662633 [DEBUG] #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 35.65MB / 43.23MB 1.4s
+2026-Apr-19 04:33:48.816164 [DEBUG] #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 42.99MB / 43.23MB 1.5s
+2026-Apr-19 04:33:49.011155 [DEBUG] #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 43.23MB / 43.23MB 1.5s done
+2026-Apr-19 04:33:49.011155 [DEBUG] #5 extracting sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287
+2026-Apr-19 04:33:50.790163 [DEBUG] #5 extracting sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 1.9s done
+2026-Apr-19 04:33:50.790163 [DEBUG] #5 DONE 3.7s
+2026-Apr-19 04:33:50.891331 [DEBUG] #5 [deps 1/5] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-Apr-19 04:33:50.891331 [DEBUG] #5 extracting sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 0.1s done
+2026-Apr-19 04:33:50.891331 [DEBUG] #5 extracting sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 0.0s done
+2026-Apr-19 04:33:50.891331 [DEBUG] #5 DONE 3.8s
+2026-Apr-19 04:33:50.891331 [DEBUG] 
+2026-Apr-19 04:33:50.891331 [DEBUG] #6 [deps 2/5] RUN apk add --no-cache libc6-compat
+2026-Apr-19 04:33:51.049812 [DEBUG] #6 ...
+2026-Apr-19 04:33:51.049812 [DEBUG] 
+2026-Apr-19 04:33:51.049812 [DEBUG] #7 [builder 2/5] WORKDIR /app
+2026-Apr-19 04:33:51.049812 [DEBUG] #7 DONE 0.2s
+2026-Apr-19 04:33:51.205441 [DEBUG] #8 [runner 3/9] RUN addgroup --system --gid 1001 nodejs
+2026-Apr-19 04:33:51.259645 [DEBUG] #8 DONE 0.2s
+2026-Apr-19 04:33:51.259645 [DEBUG] 
+2026-Apr-19 04:33:51.259645 [DEBUG] #6 [deps 2/5] RUN apk add --no-cache libc6-compat
+2026-Apr-19 04:33:51.473361 [DEBUG] #6 ...
+2026-Apr-19 04:33:51.473361 [DEBUG] 
+2026-Apr-19 04:33:51.473361 [DEBUG] #9 [runner 4/9] RUN adduser --system --uid 1001 nextjs
+2026-Apr-19 04:33:51.473361 [DEBUG] #9 DONE 0.2s
+2026-Apr-19 04:33:51.626182 [DEBUG] 
+2026-Apr-19 04:33:51.633526 [DEBUG] #6 [deps 2/5] RUN apk add --no-cache libc6-compat
+2026-Apr-19 04:33:51.939963 [DEBUG] #6 1.050 (1/3) Installing musl-obstack (1.2.3-r2)
+2026-Apr-19 04:33:52.042254 [DEBUG] #6 1.061 (2/3) Installing libucontext (1.3.3-r0)
+2026-Apr-19 04:33:52.042254 [DEBUG] #6 1.069 (3/3) Installing gcompat (1.1.0-r4)
+2026-Apr-19 04:33:52.050222 [DEBUG] #6 1.085 OK: 11.0 MiB in 21 packages
+2026-Apr-19 04:33:52.050222 [DEBUG] #6 DONE 1.1s
+2026-Apr-19 04:33:52.050222 [DEBUG] 
+2026-Apr-19 04:33:52.050222 [DEBUG] #10 [deps 3/5] WORKDIR /app
+2026-Apr-19 04:33:52.192846 [DEBUG] #10 DONE 0.1s
+2026-Apr-19 04:33:52.192846 [DEBUG] 
+2026-Apr-19 04:33:52.192846 [DEBUG] #11 [deps 4/5] COPY package.json package-lock.json* ./
+2026-Apr-19 04:33:52.192846 [DEBUG] #11 DONE 0.1s
+2026-Apr-19 04:33:52.349993 [DEBUG] #12 [deps 5/5] RUN npm install
+2026-Apr-19 04:34:23.477005 [DEBUG] #12 31.27
+2026-Apr-19 04:34:23.477005 [DEBUG] #12 31.27 added 432 packages, and audited 433 packages in 31s
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.28
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.28 153 packages are looking for funding
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.28   run `npm fund` for details
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34 2 vulnerabilities (1 moderate, 1 high)
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34 To address issues that do not require attention, run:
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34   npm audit fix
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34 To address all issues, run:
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34   npm audit fix --force
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34 Run `npm audit` for details.
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34 npm notice
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34 npm notice New major version of npm available! 10.8.2 -> 11.12.1
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+2026-Apr-19 04:<REDACTED>@11.12.1
+2026-Apr-19 04:34:23.688458 [DEBUG] #12 31.34 npm notice
+2026-Apr-19 04:34:23.884684 [DEBUG] #12 DONE 31.7s
+2026-Apr-19 04:34:32.322392 [DEBUG] #13 [builder 3/5] COPY --from=deps /app/node_modules ./node_modules
+2026-Apr-19 04:34:42.750374 [DEBUG] #13 DONE 10.4s
+2026-Apr-19 04:34:42.909564 [DEBUG] #14 [builder 4/5] COPY . .
+2026-Apr-19 04:34:43.219813 [DEBUG] #14 DONE 0.5s
+2026-Apr-19 04:34:43.379798 [DEBUG] #15 [builder 5/5] RUN npm run build
+2026-Apr-19 04:34:44.241466 [DEBUG] #15 1.016
+2026-Apr-19 04:34:44.241466 [DEBUG] #15 1.016 > temp-next@0.1.0 build
+2026-Apr-19 04:34:44.241466 [DEBUG] #15 1.016 > next build
+2026-Apr-19 04:34:44.241466 [DEBUG] #15 1.016
+2026-Apr-19 04:34:45.078555 [DEBUG] #15 1.854 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+2026-Apr-19 04:34:45.272697 [DEBUG] #15 1.856 This information is used to shape Next.js' roadmap and prioritize features.
+2026-Apr-19 04:34:45.272697 [DEBUG] #15 1.858 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+2026-Apr-19 04:34:45.272697 [DEBUG] #15 1.858 https://nextjs.org/telemetry
+2026-Apr-19 04:<REDACTED>@11.12.1
+2026-Apr-19 04:35:15.597021 [DEBUG] #15 32.29 npm notice
+2026-Apr-19 04:35:15.604910 [DEBUG] #15 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+2026-Apr-19 04:35:15.712726 [DEBUG] ------
+2026-Apr-19 04:35:15.712726 [DEBUG] > [builder 5/5] RUN npm run build:
+2026-Apr-19 04:35:15.712726 [DEBUG] 32.11       |                             ^
+2026-Apr-19 04:35:15.712726 [DEBUG] 32.11   275 |                           />
+2026-Apr-19 04:35:15.712726 [DEBUG] 32.11   276 |                           <Legend wrapperStyle={{ fontSize: '10px', fontFamily: 'monospac...
+2026-Apr-19 04:35:15.712726 [DEBUG] 32.11   277 |                           <Line type="monotone" dataKey="Strategy" stroke="#00FF94" strok...
+2026-Apr-19 04:35:15.712726 [DEBUG] 32.23 Next.js build worker exited with code: 1 and signal: null
+2026-Apr-19 04:35:15.712726 [DEBUG] 32.29 npm notice
+2026-Apr-19 04:35:15.712726 [DEBUG] 32.29 npm notice New major version of npm available! 10.8.2 -> 11.12.1
+2026-Apr-19 04:35:15.712726 [DEBUG] 32.29 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+2026-Apr-19 04:<REDACTED>@11.12.1
+2026-Apr-19 04:35:15.712726 [DEBUG] 32.29 npm notice
+2026-Apr-19 04:35:15.712726 [DEBUG] ------
+2026-Apr-19 04:35:15.720443 [DEBUG] 3 warnings found (use docker --debug to expand):
+2026-Apr-19 04:35:15.720443 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "GEMINI_API_KEY") (line 3)
+2026-Apr-19 04:35:15.720443 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "GEMINI_API_KEY") (line 20)
+2026-Apr-19 04:35:15.720443 [DEBUG] - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "GEMINI_API_KEY") (line 40)
+2026-Apr-19 04:35:15.733692 [DEBUG] Dockerfile:36
+2026-Apr-19 04:35:15.733692 [DEBUG] --------------------
+2026-Apr-19 04:35:15.733692 [DEBUG] 34 |     # ENV NEXT_TELEMETRY_DISABLED 1
+2026-Apr-19 04:35:15.733692 [DEBUG] 35 |
+2026-Apr-19 04:35:15.733692 [DEBUG] 36 | >>> RUN npm run build
+2026-Apr-19 04:35:15.733692 [DEBUG] 37 |
+2026-Apr-19 04:35:15.733692 [DEBUG] 38 |     # Production image, copy all the files and run next
+2026-Apr-19 04:35:15.733692 [DEBUG] --------------------
+2026-Apr-19 04:35:15.733692 [DEBUG] ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+2026-Apr-19 04:35:15.762975 [DEBUG] exit status 1
+2026-Apr-19 04:35:15.942150 ========================================
+2026-Apr-19 04:35:15.964097 Deployment failed: Command execution failed (exit code 1): docker exec s82e0cjg8mwxcxr0q4gq3ba0 bash -c 'bash /artifacts/build.sh'
+2026-Apr-19 04:35:15.964097 Error: #0 building with "default" instance using docker driver
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #1 [internal] load build definition from Dockerfile
+2026-Apr-19 04:35:15.964097 #1 transferring dockerfile: 2.97kB 0.0s done
+2026-Apr-19 04:35:15.964097 #1 DONE 0.0s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #2 [internal] load metadata for docker.io/library/node:20-alpine
+2026-Apr-19 04:35:15.964097 #2 DONE 1.5s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #3 [internal] load .dockerignore
+2026-Apr-19 04:35:15.964097 #3 transferring context: 2B done
+2026-Apr-19 04:35:15.964097 #3 DONE 0.0s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #4 [internal] load build context
+2026-Apr-19 04:35:15.964097 #4 DONE 0.0s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #5 [deps 1/5] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-Apr-19 04:35:15.964097 #5 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 0.0s done
+2026-Apr-19 04:35:15.964097 #5 ...
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #4 [internal] load build context
+2026-Apr-19 04:35:15.964097 #4 transferring context: 470.98kB 0.0s done
+2026-Apr-19 04:35:15.964097 #4 DONE 0.1s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #5 [deps 1/5] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-Apr-19 04:35:15.964097 #5 sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 0B / 445B 0.2s
+2026-Apr-19 04:35:15.964097 #5 sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 0B / 1.26MB 0.2s
+2026-Apr-19 04:35:15.964097 #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 0B / 43.23MB 0.2s
+2026-Apr-19 04:35:15.964097 #5 sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 0B / 3.86MB 0.2s
+2026-Apr-19 04:35:15.964097 #5 sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 445B / 445B 0.3s done
+2026-Apr-19 04:35:15.964097 #5 sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 1.26MB / 1.26MB 0.6s done
+2026-Apr-19 04:35:15.964097 #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 7.34MB / 43.23MB 0.8s
+2026-Apr-19 04:35:15.964097 #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 13.63MB / 43.23MB 0.9s
+2026-Apr-19 04:35:15.964097 #5 sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 3.86MB / 3.86MB 0.7s done
+2026-Apr-19 04:35:15.964097 #5 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb
+2026-Apr-19 04:35:15.964097 #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 22.02MB / 43.23MB 1.1s
+2026-Apr-19 04:35:15.964097 #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 29.36MB / 43.23MB 1.2s
+2026-Apr-19 04:35:15.964097 #5 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 0.3s done
+2026-Apr-19 04:35:15.964097 #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 35.65MB / 43.23MB 1.4s
+2026-Apr-19 04:35:15.964097 #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 42.99MB / 43.23MB 1.5s
+2026-Apr-19 04:35:15.964097 #5 sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 43.23MB / 43.23MB 1.5s done
+2026-Apr-19 04:35:15.964097 #5 extracting sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287
+2026-Apr-19 04:35:15.964097 #5 extracting sha256:4feea04c154301db6f4a496efa397b3db96603b1c009c797cfdde77bea8b3287 1.9s done
+2026-Apr-19 04:35:15.964097 #5 DONE 3.7s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #5 [deps 1/5] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+2026-Apr-19 04:35:15.964097 #5 extracting sha256:b2cbbfe903b0821005780971ddc5892edcc4ce74c5a48d82e1d2b382edac3122 0.1s done
+2026-Apr-19 04:35:15.964097 #5 extracting sha256:fff4e2c1b189bf87d63ad8bd07f7f4eb288d6f2b6a07a8bb44c60e8c075d2096 0.0s done
+2026-Apr-19 04:35:15.964097 #5 DONE 3.8s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #6 [deps 2/5] RUN apk add --no-cache libc6-compat
+2026-Apr-19 04:35:15.964097 #6 ...
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #7 [builder 2/5] WORKDIR /app
+2026-Apr-19 04:35:15.964097 #7 DONE 0.2s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #8 [runner 3/9] RUN addgroup --system --gid 1001 nodejs
+2026-Apr-19 04:35:15.964097 #8 DONE 0.2s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #6 [deps 2/5] RUN apk add --no-cache libc6-compat
+2026-Apr-19 04:35:15.964097 #6 ...
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #9 [runner 4/9] RUN adduser --system --uid 1001 nextjs
+2026-Apr-19 04:35:15.964097 #9 DONE 0.2s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #6 [deps 2/5] RUN apk add --no-cache libc6-compat
+2026-Apr-19 04:35:15.964097 #6 1.050 (1/3) Installing musl-obstack (1.2.3-r2)
+2026-Apr-19 04:35:15.964097 #6 1.061 (2/3) Installing libucontext (1.3.3-r0)
+2026-Apr-19 04:35:15.964097 #6 1.069 (3/3) Installing gcompat (1.1.0-r4)
+2026-Apr-19 04:35:15.964097 #6 1.085 OK: 11.0 MiB in 21 packages
+2026-Apr-19 04:35:15.964097 #6 DONE 1.1s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #10 [deps 3/5] WORKDIR /app
+2026-Apr-19 04:35:15.964097 #10 DONE 0.1s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #11 [deps 4/5] COPY package.json package-lock.json* ./
+2026-Apr-19 04:35:15.964097 #11 DONE 0.1s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #12 [deps 5/5] RUN npm install
+2026-Apr-19 04:35:15.964097 #12 31.27
+2026-Apr-19 04:35:15.964097 #12 31.27 added 432 packages, and audited 433 packages in 31s
+2026-Apr-19 04:35:15.964097 #12 31.28
+2026-Apr-19 04:35:15.964097 #12 31.28 153 packages are looking for funding
+2026-Apr-19 04:35:15.964097 #12 31.28   run `npm fund` for details
+2026-Apr-19 04:35:15.964097 #12 31.34
+2026-Apr-19 04:35:15.964097 #12 31.34 2 vulnerabilities (1 moderate, 1 high)
+2026-Apr-19 04:35:15.964097 #12 31.34
+2026-Apr-19 04:35:15.964097 #12 31.34 To address issues that do not require attention, run:
+2026-Apr-19 04:35:15.964097 #12 31.34   npm audit fix
+2026-Apr-19 04:35:15.964097 #12 31.34
+2026-Apr-19 04:35:15.964097 #12 31.34 To address all issues, run:
+2026-Apr-19 04:35:15.964097 #12 31.34   npm audit fix --force
+2026-Apr-19 04:35:15.964097 #12 31.34
+2026-Apr-19 04:35:15.964097 #12 31.34 Run `npm audit` for details.
+2026-Apr-19 04:35:15.964097 #12 31.34 npm notice
+2026-Apr-19 04:35:15.964097 #12 31.34 npm notice New major version of npm available! 10.8.2 -> 11.12.1
+2026-Apr-19 04:35:15.964097 #12 31.34 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+2026-Apr-19 04:<REDACTED>@11.12.1
+2026-Apr-19 04:35:15.964097 #12 31.34 npm notice
+2026-Apr-19 04:35:15.964097 #12 DONE 31.7s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #13 [builder 3/5] COPY --from=deps /app/node_modules ./node_modules
+2026-Apr-19 04:35:15.964097 #13 DONE 10.4s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #14 [builder 4/5] COPY . .
+2026-Apr-19 04:35:15.964097 #14 DONE 0.5s
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 #15 [builder 5/5] RUN npm run build
+2026-Apr-19 04:35:15.964097 #15 1.016
+2026-Apr-19 04:35:15.964097 #15 1.016 > temp-next@0.1.0 build
+2026-Apr-19 04:35:15.964097 #15 1.016 > next build
+2026-Apr-19 04:35:15.964097 #15 1.016
+2026-Apr-19 04:35:15.964097 #15 1.854 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+2026-Apr-19 04:35:15.964097 #15 1.856 This information is used to shape Next.js' roadmap and prioritize features.
+2026-Apr-19 04:35:15.964097 #15 1.858 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+2026-Apr-19 04:35:15.964097 #15 1.858 https://nextjs.org/telemetry
+2026-Apr-19 04:<REDACTED>@11.12.1
+2026-Apr-19 04:35:15.964097 #15 32.29 npm notice
+2026-Apr-19 04:35:15.964097 #15 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+2026-Apr-19 04:35:15.964097 ------
+2026-Apr-19 04:35:15.964097 > [builder 5/5] RUN npm run build:
+2026-Apr-19 04:35:15.964097 32.11       |                             ^
+2026-Apr-19 04:35:15.964097 32.11   275 |                           />
+2026-Apr-19 04:35:15.964097 32.11   276 |                           <Legend wrapperStyle={{ fontSize: '10px', fontFamily: 'monospac...
+2026-Apr-19 04:35:15.964097 32.11   277 |                           <Line type="monotone" dataKey="Strategy" stroke="#00FF94" strok...
+2026-Apr-19 04:35:15.964097 32.23 Next.js build worker exited with code: 1 and signal: null
+2026-Apr-19 04:35:15.964097 32.29 npm notice
+2026-Apr-19 04:35:15.964097 32.29 npm notice New major version of npm available! 10.8.2 -> 11.12.1
+2026-Apr-19 04:35:15.964097 32.29 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+2026-Apr-19 04:<REDACTED>@11.12.1
+2026-Apr-19 04:35:15.964097 32.29 npm notice
+2026-Apr-19 04:35:15.964097 ------
+2026-Apr-19 04:35:15.964097 
+2026-Apr-19 04:35:15.964097 3 warnings found (use docker --debug to expand):
+2026-Apr-19 04:35:15.964097 - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "GEMINI_API_KEY") (line 3)
+2026-Apr-19 04:35:15.964097 - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "GEMINI_API_KEY") (line 20)
+2026-Apr-19 04:35:15.964097 - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "GEMINI_API_KEY") (line 40)
+2026-Apr-19 04:35:15.964097 Dockerfile:36
+2026-Apr-19 04:35:15.964097 --------------------
+2026-Apr-19 04:35:15.964097 34 |     # ENV NEXT_TELEMETRY_DISABLED 1
+2026-Apr-19 04:35:15.964097 35 |
+2026-Apr-19 04:35:15.964097 36 | >>> RUN npm run build
+2026-Apr-19 04:35:15.964097 37 |
+2026-Apr-19 04:35:15.964097 38 |     # Production image, copy all the files and run next
+2026-Apr-19 04:35:15.964097 --------------------
+2026-Apr-19 04:35:15.964097 ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+2026-Apr-19 04:35:15.964097 exit status 1
+2026-Apr-19 04:35:15.985473 [DEBUG] Error type: RuntimeException
+2026-Apr-19 04:35:16.010128 [DEBUG] Error code: 0
+2026-Apr-19 04:35:16.032263 [DEBUG] Location: /var/www/html/app/Traits/ExecuteRemoteCommand.php:236
+2026-Apr-19 04:35:16.055684 [DEBUG] Stack trace (first 5 lines):
+2026-Apr-19 04:35:16.077228 [DEBUG] #0 /var/www/html/app/Traits/ExecuteRemoteCommand.php(104): App\Jobs\ApplicationDeploymentJob->executeCommandWithProcess()
+2026-Apr-19 04:35:16.096673 [DEBUG] #1 /var/www/html/vendor/laravel/framework/src/Illuminate/Collections/Traits/EnumeratesValues.php(275): App\Jobs\ApplicationDeploymentJob->{closure:App\Traits\ExecuteRemoteCommand::execute_remote_command():71}()
+2026-Apr-19 04:35:16.118053 [DEBUG] #2 /var/www/html/app/Traits/ExecuteRemoteCommand.php(71): Illuminate\Support\Collection->each()
+2026-Apr-19 04:35:16.141802 [DEBUG] #3 /var/www/html/app/Jobs/ApplicationDeploymentJob.php(3211): App\Jobs\ApplicationDeploymentJob->execute_remote_command()
+2026-Apr-19 04:35:16.162281 [DEBUG] #4 /var/www/html/app/Jobs/ApplicationDeploymentJob.php(870): App\Jobs\ApplicationDeploymentJob->build_image()
+2026-Apr-19 04:35:16.181916 ========================================
+2026-Apr-19 04:35:16.203306 Deployment failed. Removing the new version of your application.
+2026-Apr-19 04:35:17.265179 Gracefully shutting down build container: s82e0cjg8mwxcxr0q4gq3ba0
+2026-Apr-19 04:35:17.667089 [DEBUG] [CMD]: docker stop -t 30 s82e0cjg8mwxcxr0q4gq3ba0
+2026-Apr-19 04:35:17.667089 [DEBUG] s82e0cjg8mwxcxr0q4gq3ba0
