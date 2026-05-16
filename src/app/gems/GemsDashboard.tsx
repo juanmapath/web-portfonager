@@ -1,66 +1,46 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { SelectedAsset } from '@/app/api/types';
 import ScrapperTactics from './components/ScrapperTactics';
 import AIAnalysisPanel from './components/AIAnalysisPanel';
+import { buildAnalysisPrompt } from '@/app/api/analyze/prompt';
 
 export default function GemsDashboard() {
   const [selectedAsset, setSelectedAsset] = useState<SelectedAsset | null>(null);
-  const [aiAnalysis, setAiAnalysis] = useState<string>('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
-  const runAnalysis = useCallback(async (asset: SelectedAsset) => {
-    setIsAnalyzing(true);
-    setAiAnalysis('');
-    setAnalysisError(null);
-    try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company_name: asset.company_name,
-          raw_metrics: asset.raw_metrics,
-        }),
-      });
-      const data = await res.json() as { analysis?: string; error?: string };
-      if (!res.ok || data.error) {
-        setAnalysisError(data.error || `Error ${res.status}`);
-      } else {
-        setAiAnalysis(data.analysis || '');
-      }
-    } catch (err) {
-      setAnalysisError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }, []);
+  const promptText = useMemo(() => {
+    if (!selectedAsset) return '';
+    const m = selectedAsset.raw_metrics || {};
+    return buildAnalysisPrompt({
+      company_name: selectedAsset.company_name || 'Unknown Company',
+      roic: String(m.roic ?? m.ROIC ?? 'N/A'),
+      ev_ebitda: String(m['EV/EBITDA'] ?? m.ev_ebitda ?? 'N/A'),
+      oper_margin: String(m.oper_margin ?? 'N/A'),
+      oper_margin_avg: String(m.oper_margin_avg ?? m['Operating Margin Industry Avg'] ?? 'N/A'),
+      sales_growth_yoy: String(m.sales_growth_yoy ?? 'N/A'),
+      sales_growth_qoq: String(m.sales_growth_qoq ?? 'N/A'),
+      sales_growth_qoq_avg: String(m.sales_growth_qoq_avg ?? m['Sales Growth QoQ industry Avg'] ?? 'N/A'),
+      sales_growth_yoy_avg: String(m.sales_growth_yoy_avg ?? m['Sales Growth YoY industry Avg'] ?? 'N/A'),
+      price_per_fcf: String(m.price_per_fcf ?? m['Price to FCF'] ?? m['P/FCF'] ?? 'N/A'),
+      priceToFCF_avg: String(m.priceToFCF_avg ?? m['Price to FCF Industry Avg'] ?? 'N/A'),
+      earnings_date: String(m.earnings_date ?? m['Earnings Date'] ?? 'N/A'),
+    });
+  }, [selectedAsset]);
 
-  // Only select the asset — do NOT auto-trigger analysis
   const handleAssetSelect = useCallback((asset: SelectedAsset) => {
     setSelectedAsset(asset);
-    setAiAnalysis('');
-    setAnalysisError(null);
   }, []);
-
-  // Manual trigger for AI analysis
-  const handleRunAnalysis = useCallback(() => {
-    if (selectedAsset) runAnalysis(selectedAsset);
-  }, [selectedAsset, runAnalysis]);
 
   return (
     <>
       {/* Main scrapper section with tactics, table, and competitor charts */}
       <ScrapperTactics onAssetSelect={handleAssetSelect} />
 
-      {/* AI Analysis panel — always visible once an asset is selected */}
+      {/* AI Prompt Generator panel — always visible once an asset is selected */}
       <AIAnalysisPanel
         asset={selectedAsset}
-        analysis={aiAnalysis}
-        isLoading={isAnalyzing}
-        error={analysisError}
-        onAnalyze={handleRunAnalysis}
+        promptText={promptText}
       />
     </>
   );

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiGemsfinderClient } from '@/app/api/client';
 import { Tactic, SelectedAsset } from '@/app/api/types';
-import { Loader2, ChevronDown, Activity, TrendingUp, BarChart3, Database } from 'lucide-react';
+import { Loader2, ChevronDown, Activity, TrendingUp, BarChart3, Database, Search, Sliders } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CompetitorAnalysis from './CompetitorAnalysis';
 
@@ -12,6 +12,7 @@ export default function ScrapperTactics({ onAssetSelect }: { onAssetSelect?: (as
   const [selectedTactic, setSelectedTactic] = useState<Tactic | null>(null);
   const [assets, setAssets] = useState<SelectedAsset[]>([]);
   const [selectedAssetId, setSelectedAssetId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoadingTactics, setIsLoadingTactics] = useState(true);
   const [isLoadingAssets, setIsLoadingAssets] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +63,7 @@ export default function ScrapperTactics({ onAssetSelect }: { onAssetSelect?: (as
     const tactic = tactics.find(t => t.id === tacticId);
     if (tactic) {
       setSelectedTactic(tactic);
+      setSearchQuery('');
     }
   };
 
@@ -70,6 +72,15 @@ export default function ScrapperTactics({ onAssetSelect }: { onAssetSelect?: (as
     return val;
   };
 
+  const filteredAssets = assets.filter(asset => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    const tickerMatch = (asset.ticker || '').toLowerCase().includes(q);
+    const nameMatch = (asset.company_name || '').toLowerCase().includes(q);
+    const industryMatch = (asset.industry || '').toLowerCase().includes(q);
+    return tickerMatch || nameMatch || industryMatch;
+  });
+
   return (
     <section className="mt-8 space-y-6">
       <div className="flex items-center gap-3">
@@ -77,7 +88,7 @@ export default function ScrapperTactics({ onAssetSelect }: { onAssetSelect?: (as
         <h2 className="text-2xl font-bold tracking-tight text-white uppercase italic">Scrapper Tactics</h2>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Left column: Tactics Selection */}
         <div className="lg:col-span-1 space-y-4">
           <div className="glass-card p-5 rounded-xl border-white/5 bg-white/[0.02] backdrop-blur-md relative overflow-hidden">
@@ -111,23 +122,34 @@ export default function ScrapperTactics({ onAssetSelect }: { onAssetSelect?: (as
             </div>
 
             {selectedTactic && (
-              <div className="mt-4 space-y-3">
-                <div className="p-3 bg-white/[0.03] rounded-lg border border-white/5">
-                  <div className="text-[10px] text-gray-500 uppercase flex items-center gap-1.5 mb-1">
-                    <Database className="w-3 h-3" /> Latest Session ID
-                  </div>
-                  <div className="mono text-lg font-bold text-[var(--holo-blue)]">
-                    #{selectedTactic.latest_session_id || 'N/A'}
-                  </div>
+              <div className="mt-6 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider px-1">
+                  <Sliders className="w-3.5 h-3.5 text-[var(--holo-blue)]" />
+                  <span>Parámetros de Táctica</span>
                 </div>
 
-                <div className="p-3 bg-white/[0.03] rounded-lg border border-white/5">
-                  <div className="text-[10px] text-gray-500 uppercase flex items-center gap-1.5 mb-1">
-                    <TrendingUp className="w-3 h-3" /> Focus
-                  </div>
-                  <div className="text-sm font-medium text-gray-300">
-                    {selectedTactic.market_cap_category} Market Cap
-                  </div>
+                <div className="bg-black/30 border border-white/5 rounded-lg p-3 max-h-[280px] overflow-y-auto custom-scrollbar pr-1.5 space-y-2">
+                  {selectedTactic.params && Object.keys(selectedTactic.params).length > 0 ? (
+                    <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
+                      {Object.entries(selectedTactic.params).map(([key, val]) => (
+                        <div
+                          key={key}
+                          className="p-2 bg-white/[0.02] border border-white/5 rounded flex items-center justify-between text-xs mono hover:border-white/10 transition-colors"
+                        >
+                          <span className="text-gray-400 text-[11px] truncate mr-2 font-sans font-medium" title={key}>
+                            {key}
+                          </span>
+                          <span className="font-bold text-[var(--holo-blue)] bg-[var(--holo-blue)]/10 px-2 py-0.5 rounded text-[11px] border border-[var(--holo-blue)]/20">
+                            {val}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500 italic p-2 text-center">
+                      Sin parámetros definidos
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -136,16 +158,28 @@ export default function ScrapperTactics({ onAssetSelect }: { onAssetSelect?: (as
 
         {/* Right column: Assets Table */}
         <div className="lg:col-span-3">
-          <div className="glass-card rounded-xl border-white/5 bg-white/[0.02] backdrop-blur-md overflow-hidden min-h-[360px] flex flex-col">
-            <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/[0.01]">
+          <div className="glass-card rounded-xl border-white/5 bg-white/[0.02] backdrop-blur-md overflow-hidden min-h-[420px] flex flex-col">
+            <div className="p-4 border-b border-white/10 flex flex-wrap justify-between items-center gap-3 bg-white/[0.01]">
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-green-400" />
                 <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Assets por Ranking</span>
               </div>
-              <span className="text-[10px] mono text-gray-500">{assets.length} Resultados</span>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-gray-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por asset o industria..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="bg-black/40 border border-white/10 text-white text-xs py-1.5 pl-8 pr-3 rounded focus:outline-none focus:ring-1 focus:ring-[var(--holo-blue)] transition-all w-48 sm:w-64 mono"
+                  />
+                </div>
+                <span className="text-[10px] mono text-gray-500">{filteredAssets.length} Resultados</span>
+              </div>
             </div>
 
-            <div className="h-[260px] overflow-y-auto overflow-x-auto custom-scrollbar">
+            <div className="h-[340px] overflow-y-auto overflow-x-auto custom-scrollbar">
               <table className="w-full text-left border-collapse">
                 <thead className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter bg-black sticky top-0 z-10">
                   <tr>
@@ -168,14 +202,14 @@ export default function ScrapperTactics({ onAssetSelect }: { onAssetSelect?: (as
                           </div>
                         </td>
                       </tr>
-                    ) : assets.length === 0 ? (
+                    ) : filteredAssets.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="px-5 py-20 text-center text-gray-500 italic">
-                          No se encontraron activos para esta táctica.
+                          No se encontraron activos para esta búsqueda.
                         </td>
                       </tr>
                     ) : (
-                      assets.map((asset, index) => (
+                      filteredAssets.map((asset, index) => (
                         <motion.tr
                           key={asset.id}
                           initial={{ opacity: 0, y: 10 }}
