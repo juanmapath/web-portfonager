@@ -209,3 +209,17 @@ export interface PortfolioPercentages {
   asset_bot_percentages: AssetBotPercentage[];
   bot_percentages: BotPercentage[];
 }
+
+export interface DollarSignalPoint {
+  date: string;
+  close: number;
+  zscore: number | null;
+  bb_low: number | null;
+  buy_signal: boolean;
+}
+
+export interface DollarSignalData {
+  historical: DollarSignalPoint[];
+  last_year: DollarSignalPoint[];
+  last_month: DollarSignalPoint[];
+}

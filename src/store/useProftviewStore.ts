@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Family, Bot, Broker, BotAsset, PortfolioPercentages } from '../app/api/types';
+import { Family, Bot, Broker, BotAsset, PortfolioPercentages, DollarSignalData } from '../app/api/types';
 import { apiProftviewClient } from '../app/api/client';
 
 interface ProftviewState {
@@ -8,14 +8,18 @@ interface ProftviewState {
   brokers: Broker[];
   assets: BotAsset[];
   portfolioPercentages: PortfolioPercentages | null;
+  dollarSignal: DollarSignalData | null;
   isLoading: boolean;
+  isLoadingDollar: boolean;
   error: string | null;
+  errorDollar: string | null;
 
   fetchFamilies: () => Promise<void>;
   fetchBots: () => Promise<void>;
   fetchBrokers: () => Promise<void>;
   fetchAssets: (params?: { family?: number; bot?: number; broker?: number }) => Promise<void>;
   fetchPortfolioPercentages: () => Promise<void>;
+  fetchSignalDollar: () => Promise<void>;
   fetchAll: () => Promise<void>;
 }
 
@@ -25,8 +29,11 @@ export const useProftviewStore = create<ProftviewState>((set) => ({
   brokers: [],
   assets: [],
   portfolioPercentages: null,
+  dollarSignal: null,
   isLoading: false,
+  isLoadingDollar: false,
   error: null,
+  errorDollar: null,
 
   fetchFamilies: async () => {
     set({ isLoading: true, error: null });
@@ -83,17 +90,29 @@ export const useProftviewStore = create<ProftviewState>((set) => ({
     }
   },
 
+  fetchSignalDollar: async () => {
+    set({ isLoadingDollar: true, errorDollar: null });
+    try {
+      const dollarSignal = await apiProftviewClient.getSignalDollar();
+      set({ dollarSignal, isLoadingDollar: false });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error fetching dollar signal';
+      set({ errorDollar: message, isLoadingDollar: false });
+    }
+  },
+
   fetchAll: async () => {
     set({ isLoading: true, error: null });
     try {
-      const [families, bots, brokers, assets, portfolioPercentages] = await Promise.all([
+      const [families, bots, brokers, assets, portfolioPercentages, dollarSignal] = await Promise.all([
         apiProftviewClient.getFamilies(),
         apiProftviewClient.getBots(),
         apiProftviewClient.getBrokers(),
         apiProftviewClient.getAssets(),
-        apiProftviewClient.getPortfolioPercentages()
+        apiProftviewClient.getPortfolioPercentages(),
+        apiProftviewClient.getSignalDollar()
       ]);
-      set({ families, bots, brokers, assets, portfolioPercentages, isLoading: false });
+      set({ families, bots, brokers, assets, portfolioPercentages, dollarSignal, isLoading: false });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Error fetching all data';
       set({ error: message, isLoading: false });

@@ -6,6 +6,7 @@ import { useAuth } from "@/app/api/auth-context";
 import { LoginModal } from "@/components/LoginModal";
 import { PortfolioHistoryChart } from "@/components/PortfolioHistoryChart";
 import { PortfolioDistributionCharts } from "@/components/PortfolioDistributionCharts";
+import { SignalDollarChart } from "@/components/SignalDollarChart";
 
 
 export default function DashboardPage() {
@@ -61,6 +62,11 @@ export default function DashboardPage() {
       {/* Portfolio Distribution Section */}
       <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
         <PortfolioDistributionCharts />
+      </section>
+
+      {/* Signal Dollar Bot Section */}
+      <section className="animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
+        <SignalDollarChart />
       </section>
 
       {/* Main Stats Grid */}

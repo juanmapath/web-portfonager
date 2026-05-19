@@ -1,4 +1,4 @@
-import { Family, Bot, Broker, BotAsset, AggregatedStats, PortfolioHistory, Tactic, SelectedAsset, CompetitorAsset, PortfolioPercentages } from './types';
+import { Family, Bot, Broker, BotAsset, AggregatedStats, PortfolioHistory, Tactic, SelectedAsset, CompetitorAsset, PortfolioPercentages, DollarSignalData } from './types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_PROFTVIEW_API_URL || 'http://localhost:8000/api/proftview';
 
@@ -164,6 +164,13 @@ export const apiProftviewClient = {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data: unknown = await res.json();
     return data as PortfolioPercentages;
+  },
+
+  async getSignalDollar(): Promise<DollarSignalData> {
+    const res = await fetch(`${BASE_URL}/signal-dollar/`);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data: unknown = await res.json();
+    return data as DollarSignalData;
   }
 };
 
