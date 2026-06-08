@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiGemsfinderClient } from '@/app/api/client';
 import { Tactic, SelectedAsset } from '@/app/api/types';
-import { Loader2, ChevronDown, Activity, TrendingUp, BarChart3, Database, Search, Sliders } from 'lucide-react';
+import { Loader2, ChevronDown, Activity, TrendingUp, BarChart3, Database, Search, Sliders, Play, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CompetitorAnalysis from './CompetitorAnalysis';
 
@@ -16,6 +16,9 @@ export default function ScrapperTactics({ onAssetSelect }: { onAssetSelect?: (as
   const [isLoadingTactics, setIsLoadingTactics] = useState(true);
   const [isLoadingAssets, setIsLoadingAssets] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRunningScreener, setIsRunningScreener] = useState(false);
+  const [screenerStatus, setScreenerStatus] = useState<'success' | 'error' | null>(null);
+  const [screenerMessage, setScreenerMessage] = useState('');
 
   // Fetch tactics on mount
   useEffect(() => {
@@ -35,6 +38,31 @@ export default function ScrapperTactics({ onAssetSelect }: { onAssetSelect?: (as
     }
     loadTactics();
   }, []);
+
+  const handleRunScreener = async () => {
+    setIsRunningScreener(true);
+    setScreenerStatus(null);
+    try {
+      const result = await apiGemsfinderClient.runScreener();
+      setScreenerStatus('success');
+      setScreenerMessage(result.detail || 'GemsFinder screener encolado exitosamente.');
+      // Refresh tactics list to get potential updates (e.g. latest session ID changes eventually)
+      const data = await apiGemsfinderClient.getTactics();
+      setTactics(data);
+      if (selectedTactic) {
+        const updated = data.find(t => t.id === selectedTactic.id);
+        if (updated) {
+          setSelectedTactic(updated);
+        }
+      }
+    } catch (err: any) {
+      console.error('Error running screener:', err);
+      setScreenerStatus('error');
+      setScreenerMessage(err.message || 'Error al ejecutar el screener.');
+    } finally {
+      setIsRunningScreener(false);
+    }
+  };
 
   // Fetch assets when selectedTactic changes
   useEffect(() => {
@@ -83,10 +111,69 @@ export default function ScrapperTactics({ onAssetSelect }: { onAssetSelect?: (as
 
   return (
     <section className="mt-8 space-y-6">
-      <div className="flex items-center gap-3">
-        <Activity className="text-[var(--holo-blue)] w-6 h-6" />
-        <h2 className="text-2xl font-bold tracking-tight text-white uppercase italic">Scrapper Tactics</h2>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Activity className="text-[var(--holo-blue)] w-6 h-6" />
+          <h2 className="text-2xl font-bold tracking-tight text-white uppercase italic">Scrapper Tactics</h2>
+        </div>
+
+        <button
+          onClick={handleRunScreener}
+          disabled={isRunningScreener}
+          style={{
+            background: 'linear-gradient(90deg, #00d4ff 0%, #00ff94 100%)',
+            boxShadow: '0 0 15px rgba(0, 212, 255, 0.4)',
+          }}
+          className="flex items-center gap-2 px-4 py-2 text-black font-extrabold rounded-lg hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none text-xs uppercase tracking-wider font-mono border border-white/20"
+        >
+          {isRunningScreener ? (
+            <>
+              <Loader2 className="w-4.5 h-4.5 animate-spin" />
+              Ejecutando...
+            </>
+          ) : (
+            <>
+              <Play className="w-3.5 h-3.5 fill-black" />
+              Ejecutar Screener
+            </>
+          )}
+        </button>
       </div>
+
+      <AnimatePresence mode="wait">
+        {screenerStatus && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`p-4 rounded-xl border text-xs flex items-center justify-between gap-3 backdrop-blur-md ${
+              screenerStatus === 'success'
+                ? 'bg-green-500/10 border-green-500/20 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.1)]'
+                : 'bg-red-500/10 border-red-500/20 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.1)]'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              {screenerStatus === 'success' ? (
+                <CheckCircle2 className="w-4.5 h-4.5 shrink-0 text-green-400" />
+              ) : (
+                <AlertTriangle className="w-4.5 h-4.5 shrink-0 text-red-400" />
+              )}
+              <div className="flex flex-col">
+                <span className="font-bold uppercase tracking-wider mono text-[10px]">
+                  {screenerStatus === 'success' ? 'Operación Exitosa' : 'Error de Ejecución'}
+                </span>
+                <span className="mono mt-0.5 text-gray-300">{screenerMessage}</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setScreenerStatus(null)}
+              className="text-gray-500 hover:text-white transition-colors p-1"
+            >
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Left column: Tactics Selection */}

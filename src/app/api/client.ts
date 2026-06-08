@@ -196,6 +196,27 @@ export const apiGemsfinderClient = {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data: unknown = await res.json();
     return data as CompetitorAsset[];
+  },
+
+  async runScreener(): Promise<{ detail: string; task_id: string; active_tactics: string[] }> {
+    const res = await fetch(`${GEMS_BASE_URL}/run-screener/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+    });
+    if (!res.ok) {
+      const errorText = await res.text();
+      let errorMsg = `HTTP error! status: ${res.status}`;
+      try {
+        const errorJson = JSON.parse(errorText);
+        if (errorJson.detail) errorMsg = errorJson.detail;
+      } catch (_) {}
+      throw new Error(errorMsg);
+    }
+    const data: unknown = await res.json();
+    return data as { detail: string; task_id: string; active_tactics: string[] };
   }
 };
 
