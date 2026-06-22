@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import { AuthProvider } from "@/app/api/auth-context";
+import Link from "next/link";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -41,13 +42,27 @@ export default function RootLayout({
       >
         <AuthProvider>
           <Sidebar />
-          <main className="ml-24 transition-all duration-300 min-h-screen p-8">
-            <div className="max-w-7xl mx-auto">
+          <main className="ml-24 transition-all duration-300 min-h-screen p-8 flex flex-col justify-between">
+            <div className="max-w-7xl mx-auto w-full flex-grow">
               {children}
             </div>
+            
+            <footer className="mt-20 border-t border-white/5 pt-8 pb-4 max-w-7xl mx-auto w-full">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-mono text-gray-500">
+                <div>
+                  © 2026 DGEN SYSTEMS / PORTFONAGER 5000. ALL RIGHTS RESERVED.
+                </div>
+                <div className="flex flex-wrap justify-center gap-6">
+                  <Link href="/privacy-policy" className="hover:text-terminal-green transition-colors uppercase">Política de Privacidad</Link>
+                  <Link href="/terms-of-service" className="hover:text-cyber-purple transition-colors uppercase">Condiciones del Servicio</Link>
+                  <Link href="/data-deletion" className="hover:text-red-500 transition-colors uppercase">Eliminación de Datos</Link>
+                </div>
+              </div>
+            </footer>
           </main>
         </AuthProvider>
       </body>
     </html>
   );
 }
+
