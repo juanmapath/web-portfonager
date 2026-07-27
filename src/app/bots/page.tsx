@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { apiProftviewClient } from '@/app/api/client';
 import { useAuth } from '@/app/api/auth-context';
 import { Family, Bot, BotAsset, AggregatedStats, Broker } from '@/app/api/types';
-import { Database, Terminal, Plus, DollarSign, XCircle, X, Lock } from 'lucide-react';
+import { Database, Terminal, Plus, DollarSign, XCircle, X, Lock, ChevronDown } from 'lucide-react';
 
 export default function BotsPage() {
   const { isAuthenticated } = useAuth();
@@ -18,6 +18,13 @@ export default function BotsPage() {
   const [aggregatedStats, setAggregatedStats] = useState<AggregatedStats | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
+
+  // New Filter states
+  const [selectedBroker, setSelectedBroker] = useState<number | null>(null);
+  const [filterPendToAdd, setFilterPendToAdd] = useState<'all' | 'zero' | 'greaterThanZero'>('all');
+  const [filterRets, setFilterRets] = useState<'all' | 'positive' | 'negative'>('all');
+  const [filterQtyOpen, setFilterQtyOpen] = useState<'all' | 'zero' | 'greaterThanZero'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Modal states
   const [isAddCapitalModalOpen, setIsAddCapitalModalOpen] = useState(false);
@@ -72,12 +79,15 @@ export default function BotsPage() {
     async function filterAssets() {
       if (isLoading) return; // Prevent initial double fetch
       try {
-        const params: { family?: number; bot?: number } = {};
+        const params: { family?: number; bot?: number; broker?: number } = {};
         if (selectedFamily) {
           params.family = selectedFamily;
         }
         if (selectedBot) {
           params.bot = selectedBot;
+        }
+        if (selectedBroker) {
+          params.broker = selectedBroker;
         }
         
         const [assetsRes, statsRes] = await Promise.all([
@@ -93,7 +103,7 @@ export default function BotsPage() {
     }
     
     filterAssets();
-  }, [selectedFamily, selectedBot, isLoading]);
+  }, [selectedFamily, selectedBot, selectedBroker, isLoading]);
 
   const selectedModalAsset = useMemo(() => 
     assets.find(a => a.id === modalAssetId), 
@@ -131,9 +141,14 @@ export default function BotsPage() {
       setModalAmount('');
       
       // Refresh data
+      const refreshParams: { family?: number; bot?: number; broker?: number } = {};
+      if (selectedFamily) refreshParams.family = selectedFamily;
+      if (selectedBot) refreshParams.bot = selectedBot;
+      if (selectedBroker) refreshParams.broker = selectedBroker;
+
       const [assetsRes, statsRes] = await Promise.all([
-        apiProftviewClient.getAssets(selectedBot ? { bot: selectedBot } : selectedFamily ? { family: selectedFamily } : undefined),
-        apiProftviewClient.getAggregatedAssets(selectedBot ? { bot: selectedBot } : selectedFamily ? { family: selectedFamily } : undefined)
+        apiProftviewClient.getAssets(refreshParams),
+        apiProftviewClient.getAggregatedAssets(refreshParams)
       ]);
       setAssets(assetsRes);
       setAggregatedStats(statsRes);
@@ -162,9 +177,14 @@ export default function BotsPage() {
       setModalAssetAmount('');
       setAssetModalMode(null);
       
+      const refreshParams: { family?: number; bot?: number; broker?: number } = {};
+      if (selectedFamily) refreshParams.family = selectedFamily;
+      if (selectedBot) refreshParams.bot = selectedBot;
+      if (selectedBroker) refreshParams.broker = selectedBroker;
+
       const [assetsRes, statsRes] = await Promise.all([
-        apiProftviewClient.getAssets(selectedBot ? { bot: selectedBot } : selectedFamily ? { family: selectedFamily } : undefined),
-        apiProftviewClient.getAggregatedAssets(selectedBot ? { bot: selectedBot } : selectedFamily ? { family: selectedFamily } : undefined)
+        apiProftviewClient.getAssets(refreshParams),
+        apiProftviewClient.getAggregatedAssets(refreshParams)
       ]);
       setAssets(assetsRes);
       setAggregatedStats(statsRes);
@@ -197,9 +217,14 @@ export default function BotsPage() {
       setCloseQuantity('');
       setCloseAllQuantity(true);
       
+      const refreshParams: { family?: number; bot?: number; broker?: number } = {};
+      if (selectedFamily) refreshParams.family = selectedFamily;
+      if (selectedBot) refreshParams.bot = selectedBot;
+      if (selectedBroker) refreshParams.broker = selectedBroker;
+
       const [assetsRes, statsRes] = await Promise.all([
-        apiProftviewClient.getAssets(selectedBot ? { bot: selectedBot } : selectedFamily ? { family: selectedFamily } : undefined),
-        apiProftviewClient.getAggregatedAssets(selectedBot ? { bot: selectedBot } : selectedFamily ? { family: selectedFamily } : undefined)
+        apiProftviewClient.getAssets(refreshParams),
+        apiProftviewClient.getAggregatedAssets(refreshParams)
       ]);
       setAssets(assetsRes);
       setAggregatedStats(statsRes);
@@ -222,6 +247,214 @@ export default function BotsPage() {
     if (!selectedFamily) return bots;
     return bots.filter(b => b.family === selectedFamily);
   }, [bots, selectedFamily]);
+
+  const filteredAssets = useMemo(() => {
+    return assets.filter(asset => {
+      // 1. pend_to_add filter: 0 or >0
+      const capToAdd = asset.cap_to_add ?? 0;
+      if (filterPendToAdd === 'zero' && capToAdd !== 0) return false;
+      if (filterPendToAdd === 'greaterThanZero' && capToAdd <= 0) return false;
+
+      // 2. rets filter: >0 or <0
+      const capAdded = asset.capAdded ?? 0;
+      const rets = capAdded > 0 ? ((asset.pnl_un ?? 0) + (asset.PNL ?? 0)) / capAdded : 0;
+      if (filterRets === 'positive' && rets <= 0) return false;
+      if (filterRets === 'negative' && rets >= 0) return false;
+
+      // 3. qty_open filter: 0 or >0
+      const qtyOpen = asset.qty_open ?? 0;
+      if (filterQtyOpen === 'zero' && qtyOpen !== 0) return false;
+      if (filterQtyOpen === 'greaterThanZero' && qtyOpen <= 0) return false;
+
+      // 4. Search query filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchesAsset = asset.asset?.toLowerCase().includes(query);
+        const matchesBot = asset.bot_name?.toLowerCase().includes(query);
+        const matchesFamily = asset.family_name?.toLowerCase().includes(query);
+        if (!matchesAsset && !matchesBot && !matchesFamily) return false;
+      }
+
+      return true;
+    });
+  }, [assets, filterPendToAdd, filterRets, filterQtyOpen, searchQuery]);
+
+  const { activeAssets, inactiveAssets } = useMemo(() => {
+    const active: BotAsset[] = [];
+    const inactive: BotAsset[] = [];
+    filteredAssets.forEach(a => {
+      if (a.operate) {
+        active.push(a);
+      } else {
+        inactive.push(a);
+      }
+    });
+    return { activeAssets: active, inactiveAssets: inactive };
+  }, [filteredAssets]);
+
+  const handleClearFilters = () => {
+    setSelectedFamily(null);
+    setSelectedBot(null);
+    setSelectedBroker(null);
+    setFilterPendToAdd('all');
+    setFilterQtyOpen('all');
+    setFilterRets('all');
+    setSearchQuery('');
+  };
+
+  const renderAssetRow = (asset: BotAsset) => {
+    const isExpanded = expandedAssetId === asset.id;
+    const capAdded = asset.capAdded ?? 0;
+    const rets = capAdded > 0 ? ((asset.pnl_un ?? 0) + (asset.PNL ?? 0)) / capAdded : 0;
+    
+    return (
+      <div 
+        key={asset.id} 
+        onClick={() => setExpandedAssetId(isExpanded ? null : asset.id)}
+        className={`border border-white/5 hover:border-terminal-green/30 bg-void/50 hover:bg-white/[0.02] p-4 rounded-xl transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col gap-4 ${
+          isExpanded ? 'shadow-[0_0_30px_rgba(0,255,148,0.1)] border-terminal-green/25' : ''
+        }`}
+      >
+        {/* Horizontal Row Header (Visible when collapsed) */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 w-full relative z-10">
+          
+          {/* Col 1: Ticker & Price */}
+          <div className="flex items-baseline gap-2.5 min-w-[120px]">
+            <span className="text-lg font-bold text-white tracking-widest uppercase hover:text-terminal-green transition-colors">{asset.asset}</span>
+            <span className="text-xs font-mono text-gray-500 font-medium">${asset.last_price?.toLocaleString() ?? 0}</span>
+          </div>
+
+          {/* Col 2: Bot & Family Info */}
+          <div className="flex flex-col min-w-[160px]">
+            <span className="text-xs text-terminal-green font-mono font-bold">{asset.bot_name}</span>
+            <span className="text-[9px] text-gray-500 uppercase font-mono tracking-wider">{asset.family_name}</span>
+          </div>
+
+          {/* Col 3: Broker */}
+          <div className="min-w-[100px]">
+            <span className="text-[8px] text-gray-500 uppercase tracking-widest block font-bold mb-0.5">Broker</span>
+            <span className="text-xs font-mono text-white/90">{asset.broker_name}</span>
+          </div>
+
+          {/* Col 4: Qty Open & Pos Value */}
+          <div className="min-w-[140px]">
+            <span className="text-[8px] text-gray-500 uppercase tracking-widest block font-bold mb-0.5">Qty / Pos Value</span>
+            <span className="text-xs font-mono text-white">
+              {asset.qty_open ?? 0} <span className="text-gray-600">/</span> ${(asset.qty_open === 0 ? asset.cap_to_trade : asset.cap_value_in_trade)?.toLocaleString() ?? 0}
+            </span>
+          </div>
+
+          {/* Col 5: Un PNL & Rets */}
+          <div className="min-w-[160px]">
+            <span className="text-[8px] text-gray-500 uppercase tracking-widest block font-bold mb-0.5">Un PNL / Rets</span>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-mono font-bold ${(asset.pnl_un ?? 0) >= 0 ? 'text-terminal-green' : 'text-red-500'}`}>
+                {(asset.pnl_un ?? 0) >= 0 ? '+' : ''}{(asset.pnl_un ?? 0).toLocaleString()}
+              </span>
+              <span className={`text-xs font-mono ${rets >= 0 ? 'text-terminal-green' : 'text-red-500'}`}>
+                ({rets >= 0 ? '+' : ''}{(rets * 100).toFixed(2)}%)
+              </span>
+            </div>
+          </div>
+
+          {/* Col 6: Status & Chevron */}
+          <div className="flex items-center gap-4 justify-between lg:justify-end min-w-[130px]">
+            <div className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider border ${asset.operate ? 'bg-terminal-green/10 text-terminal-green border-terminal-green/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+              {asset.operate ? 'ACTIVE' : 'INACTIVE'}
+            </div>
+            <ChevronDown 
+              size={16} 
+              className={`text-gray-500 transition-transform duration-300 hidden lg:block ${isExpanded ? 'rotate-180 text-terminal-green' : ''}`} 
+            />
+          </div>
+
+        </div>
+
+        {/* EXPANDED SECTION */}
+        {isExpanded && (
+          <div className="mt-2 pt-4 border-t border-dashed border-white/10 relative z-10 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-4 px-2 sm:px-0">
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Op Price</p>
+                <p className="font-mono text-white text-sm mt-1">${asset.op_price?.toLocaleString() ?? 0}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Pend To Add</p>
+                <p className="font-mono text-white text-sm mt-1">${asset.cap_to_add?.toLocaleString() ?? 0}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Cap Added</p>
+                <p className="font-mono text-white text-sm mt-1">${asset.capAdded?.toLocaleString() ?? 0}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest">Created Date</p>
+                <p className="font-mono text-white text-sm mt-1">{asset.created_date ? new Date(asset.created_date).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'}</p>
+              </div>
+            </div>
+
+            {asset.params1 && (
+              <div className="mb-6 px-2 sm:px-0">
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1.5">Params</p>
+                <p className="font-mono text-terminal-green text-xs break-all bg-terminal-green/5 p-2 rounded border border-terminal-green/20">
+                  {asset.params1.replace(/\[|\]/g, '')}
+                </p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-3">
+              {isAuthenticated ? (
+                <>
+                  <button 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setModalAssetId(asset.id);
+                      setAssetModalMode('add');
+                      setIsAddAssetCapitalModalOpen(true);
+                    }}
+                    className="flex-1 sm:flex-none px-6 py-2.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/50 hover:bg-terminal-green hover:text-black transition-colors rounded-sm text-[10px] font-extrabold uppercase tracking-widest flex items-center justify-center gap-2"
+                  >
+                    <DollarSign size={14} />
+                    Add Capital
+                  </button>
+                  <button 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setModalAssetId(asset.id);
+                      setAssetModalMode('remove');
+                      setIsAddAssetCapitalModalOpen(true);
+                    }}
+                    className="flex-1 sm:flex-none px-6 py-2.5 bg-amber-500/10 text-amber-500 border border-amber-500/50 hover:bg-amber-500 hover:text-black transition-colors rounded-sm text-[10px] font-extrabold uppercase tracking-widest flex items-center justify-center gap-2"
+                  >
+                    <XCircle size={14} />
+                    Remove Capital
+                  </button>
+                  {(asset.qty_open ?? 0) > 0 && (
+                    <button 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        setModalAssetId(asset.id);
+                        setIsClosePositionModalOpen(true);
+                      }}
+                      className="flex-1 sm:flex-none px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/50 hover:bg-red-500 hover:text-white transition-colors rounded-sm text-[10px] font-extrabold uppercase tracking-widest flex items-center justify-center gap-2"
+                    >
+                      <Terminal size={14} />
+                      Close Positions
+                    </button>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-center gap-2 px-4 py-2 bg-void border border-white/5 rounded-sm">
+                  <Lock size={12} className="text-gray-600" />
+                  <span className="text-[9px] font-mono text-gray-600 uppercase tracking-widest">Auth required for operations</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-12 pb-20 pt-4">
@@ -263,58 +496,9 @@ export default function BotsPage() {
         </div>
       </header>
       
-      {/* Filter Section */}
-      <div className="flex flex-col md:flex-row items-center gap-6">
-        {/* Dropdown for Family */}
-        <div className="relative">
-          <select 
-            value={selectedFamily || ''}
-            onChange={handleFamilyChange}
-            className="appearance-none bg-transparent border border-terminal-green text-terminal-green px-8 py-[14px] rounded-[14px] outline-none hover:bg-terminal-green/5 transition-colors cursor-pointer pr-14 min-w-[200px] uppercase tracking-widest font-mono text-sm"
-            disabled={isLoading}
-            style={{ borderRadius: '12px' }}
-          >
-            <option value="" className="bg-void text-white">ALL</option>
-            {families.map(f => (
-              <option key={f.id} value={f.id} className="bg-void text-white">{f.name}</option>
-            ))}
-          </select>
-          <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-terminal-green">
-            <svg width="18" height="10" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        </div>
-
-        {/* Bots Sliding List inside container block */}
-        <div 
-          className="flex-1 overflow-x-auto flex items-center w-full" 
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          <div className="border border-terminal-green rounded-[12px] px-2 py-2 flex items-center gap-3 min-w-[300px] min-h-[50px] bg-void">
-            {filteredBots.map(bot => (
-              <button
-                key={bot.id}
-                onClick={() => setSelectedBot(bot.id === selectedBot ? null : bot.id)}
-                className={`px-5 py-1.5 rounded-full border transition-all text-xs tracking-widest uppercase font-mono whitespace-nowrap
-                  ${selectedBot === bot.id 
-                    ? 'bg-terminal-green text-black border-terminal-green font-bold shadow-[0_0_10px_rgba(0,255,148,0.5)]' 
-                    : 'border-white text-white hover:border-terminal-green hover:text-terminal-green'
-                  }`}
-              >
-                {bot.name}
-              </button>
-            ))}
-            {filteredBots.length === 0 && (
-              <div className="text-gray-500 text-xs tracking-widest uppercase font-mono px-4 w-full text-center">NO BOTS FOUND</div>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Aggregated Stats Section */}
       {aggregatedStats && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
           <div className="cyber-card p-4 rounded-xl border-t-2 border-t-sky-400/30 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-b from-sky-400/[0.02] to-transparent pointer-events-none"></div>
             <p className="text-[10px] text-gray-500 uppercase tracking-widest relative z-10">Capital</p>
@@ -363,159 +547,259 @@ export default function BotsPage() {
         </div>
       )}
 
+      {/* Filters Control Panel */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-9 gap-6 items-end bg-void border border-white/5 p-5 rounded-[12px]">
+        {/* Search Bar */}
+        <div className="sm:col-span-2 md:col-span-1 lg:col-span-2 flex flex-col gap-1.5">
+          <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest pl-1">Search Ticker / Name</span>
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              placeholder="ENTER TICKER OR NAME..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-transparent border border-white/10 text-white pl-4 pr-10 py-3 rounded-[12px] outline-none focus:border-terminal-green/50 transition-colors font-mono text-xs uppercase tracking-wider"
+            />
+            {searchQuery ? (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-4 text-gray-500 hover:text-white transition-colors"
+                type="button"
+              >
+                <X size={16} />
+              </button>
+            ) : (
+              <svg className="absolute right-4 text-gray-500 pointer-events-none" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            )}
+          </div>
+        </div>
+
+        {/* Family Dropdown */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest pl-1">Family</span>
+          <div className="relative">
+            <select 
+              value={selectedFamily || ''}
+              onChange={handleFamilyChange}
+              className="appearance-none bg-transparent border border-white/10 text-white w-full px-4 py-[13px] rounded-[12px] outline-none hover:bg-white/5 transition-colors cursor-pointer pr-10 uppercase tracking-widest font-mono text-xs"
+              disabled={isLoading}
+            >
+              <option value="" className="bg-void text-white">ALL FAMILIES</option>
+              {families.map(f => (
+                <option key={f.id} value={f.id} className="bg-void text-white">{f.name}</option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+              <svg width="12" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Bot Dropdown */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest pl-1">Bot</span>
+          <div className="relative">
+            <select 
+              value={selectedBot || ''}
+              onChange={(e) => setSelectedBot(e.target.value ? Number(e.target.value) : null)}
+              className="appearance-none bg-transparent border border-white/10 text-white w-full px-4 py-[13px] rounded-[12px] outline-none hover:bg-white/5 transition-colors cursor-pointer pr-10 uppercase tracking-widest font-mono text-xs"
+              disabled={isLoading}
+            >
+              <option value="" className="bg-void text-white">ALL BOTS</option>
+              {filteredBots.map(b => (
+                <option key={b.id} value={b.id} className="bg-void text-white">{b.name}</option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+              <svg width="12" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Broker Dropdown */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest pl-1">Broker</span>
+          <div className="relative">
+            <select 
+              value={selectedBroker || ''}
+              onChange={(e) => setSelectedBroker(e.target.value ? Number(e.target.value) : null)}
+              className="appearance-none bg-transparent border border-white/10 text-white w-full px-4 py-[13px] rounded-[12px] outline-none hover:bg-white/5 transition-colors cursor-pointer pr-10 uppercase tracking-widest font-mono text-xs"
+              disabled={isLoading}
+            >
+              <option value="" className="bg-void text-white">ALL BROKERS</option>
+              {brokers.map(b => (
+                <option key={b.id} value={b.id} className="bg-void text-white">{b.name}</option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+              <svg width="12" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Pend To Add Filter */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest pl-1">Pend To Add</span>
+          <div className="flex bg-black border border-white/10 rounded-[12px] p-1 gap-1 w-full min-h-[46px] items-center">
+            <button
+              onClick={() => setFilterPendToAdd('all')}
+              type="button"
+              className={`flex-1 py-2 rounded-[8px] font-mono text-[10px] tracking-wider transition-all uppercase ${
+                filterPendToAdd === 'all' ? 'bg-terminal-green text-black font-bold' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilterPendToAdd('zero')}
+              type="button"
+              className={`flex-1 py-2 rounded-[8px] font-mono text-[10px] tracking-wider transition-all uppercase ${
+                filterPendToAdd === 'zero' ? 'bg-terminal-green text-black font-bold' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              0
+            </button>
+            <button
+              onClick={() => setFilterPendToAdd('greaterThanZero')}
+              type="button"
+              className={`flex-1 py-2 rounded-[8px] font-mono text-[10px] tracking-wider transition-all uppercase ${
+                filterPendToAdd === 'greaterThanZero' ? 'bg-terminal-green text-black font-bold' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              &gt;0
+            </button>
+          </div>
+        </div>
+
+        {/* Qty Open Filter */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest pl-1">Qty Open</span>
+          <div className="flex bg-black border border-white/10 rounded-[12px] p-1 gap-1 w-full min-h-[46px] items-center">
+            <button
+              onClick={() => setFilterQtyOpen('all')}
+              type="button"
+              className={`flex-1 py-2 rounded-[8px] font-mono text-[10px] tracking-wider transition-all uppercase ${
+                filterQtyOpen === 'all' ? 'bg-terminal-green text-black font-bold' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilterQtyOpen('zero')}
+              type="button"
+              className={`flex-1 py-2 rounded-[8px] font-mono text-[10px] tracking-wider transition-all uppercase ${
+                filterQtyOpen === 'zero' ? 'bg-terminal-green text-black font-bold' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              0
+            </button>
+            <button
+              onClick={() => setFilterQtyOpen('greaterThanZero')}
+              type="button"
+              className={`flex-1 py-2 rounded-[8px] font-mono text-[10px] tracking-wider transition-all uppercase ${
+                filterQtyOpen === 'greaterThanZero' ? 'bg-terminal-green text-black font-bold' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              &gt;0
+            </button>
+          </div>
+        </div>
+
+        {/* Rets Filter (Returns) */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest pl-1">Returns (Rets)</span>
+          <div className="flex bg-black border border-white/10 rounded-[12px] p-1 gap-1 w-full min-h-[46px] items-center">
+            <button
+              onClick={() => setFilterRets('all')}
+              type="button"
+              className={`flex-1 py-2 rounded-[8px] font-mono text-[10px] tracking-wider transition-all uppercase ${
+                filterRets === 'all' ? 'bg-terminal-green text-black font-bold' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilterRets('positive')}
+              type="button"
+              className={`flex-1 py-2 rounded-[8px] font-mono text-[10px] tracking-wider transition-all uppercase ${
+                filterRets === 'positive' ? 'bg-terminal-green text-black font-bold' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              &gt;0
+            </button>
+            <button
+              onClick={() => setFilterRets('negative')}
+              type="button"
+              className={`flex-1 py-2 rounded-[8px] font-mono text-[10px] tracking-wider transition-all uppercase ${
+                filterRets === 'negative' ? 'bg-terminal-green text-black font-bold' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              &lt;0
+            </button>
+          </div>
+        </div>
+
+        {/* Clear Filters Button */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest pl-1 invisible sm:block">&nbsp;</span>
+          <button
+            onClick={handleClearFilters}
+            type="button"
+            className="w-full bg-red-500/10 hover:bg-red-500 hover:text-white text-red-500 border border-red-500/30 transition-all font-mono text-xs uppercase tracking-widest py-3 px-4 rounded-[12px] min-h-[46px] flex items-center justify-center gap-2"
+          >
+            <X size={14} />
+            Clear
+          </button>
+        </div>
+      </div>
+
       {/* Assets Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
+      <div className="space-y-12 mt-8">
         {isLoading && assets.length === 0 ? (
-          <div className="col-span-full py-12 flex items-center justify-center">
+          <div className="py-12 flex items-center justify-center">
              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-terminal-green"></div>
           </div>
-        ) : assets.length === 0 ? (
-          <div className="col-span-full py-12 flex flex-col items-center justify-center cyber-card border-dashed">
+        ) : filteredAssets.length === 0 ? (
+          <div className="py-12 flex flex-col items-center justify-center cyber-card border-dashed">
              <Database className="text-white/20 mb-4" size={48} />
              <p className="text-gray-400 font-mono text-sm tracking-widest uppercase">No assets found for current selection.</p>
           </div>
         ) : (
-          assets.map(asset => {
-            const isExpanded = expandedAssetId === asset.id;
-            const capAdded = asset.capAdded ?? 0;
-            const rets = capAdded > 0 ? ((asset.pnl_un ?? 0) + (asset.PNL ?? 0)) / capAdded : 0;
-            
-            return (
-              <div 
-                key={asset.id} 
-                onClick={() => setExpandedAssetId(isExpanded ? null : asset.id)}
-                className={`cyber-card p-5 group flex flex-col rounded-xl border-t-2 border-t-terminal-green/50 hover:bg-white/[0.03] transition-all duration-300 relative overflow-hidden cursor-pointer ${
-                  isExpanded ? 'md:col-span-2 xl:col-span-2 shadow-[0_0_30px_rgba(0,255,148,0.15)] ring-1 ring-terminal-green/30' : ''
-                }`}
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-terminal-green/[0.03] to-transparent pointer-events-none transition-opacity duration-300"></div>
-                
-                <div className="flex justify-between items-start mb-4 relative z-10 hover:text-terminal-green transition-colors">
-                  <div className="flex flex-col">
-                    <div className="flex items-baseline gap-2">
-                      <h3 className="text-xl font-bold text-white tracking-widest group-hover:text-terminal-green transition-colors">{asset.asset}</h3>
-                      <span className="text-xs font-mono text-gray-500 font-medium">${asset.last_price?.toLocaleString() ?? 0}</span>
-                    </div>
-                    <p className="text-xs text-terminal-green font-mono mt-0.5 hover:brightness-125 transition-all">{asset.bot_name}</p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                     <div className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider mb-2 ${asset.operate ? 'bg-terminal-green/20 text-terminal-green border border-terminal-green/30' : 'bg-red-500/20 text-red-500 border border-red-500/30'}`}>
-                       {asset.operate ? 'ACTIVE' : 'INACTIVE'}
-                     </div>
-                     <span className="text-[10px] text-gray-500 uppercase font-mono">{asset.broker_name}</span>
-                  </div>
+          <>
+            {/* Active Assets Grid */}
+            {activeAssets.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-terminal-green animate-pulse"></div>
+                  <h2 className="text-lg font-mono text-white font-bold tracking-widest uppercase">Active Bots / Assets ({activeAssets.length})</h2>
                 </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-auto border-t border-white/10 pt-4 relative z-10 px-2 sm:px-0">
-                  <div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">Qty Open</p>
-                    <p className="font-mono text-white text-sm mt-1">{asset.qty_open ?? 0}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">Pos Value</p>
-                    <p className="font-mono text-white text-sm mt-1">
-                      ${(asset.qty_open === 0 ? asset.cap_to_trade : asset.cap_value_in_trade)?.toLocaleString() ?? 0}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">Un Pnl</p>
-                    <p className={`font-mono text-sm mt-1 ${(asset.pnl_un ?? 0) >= 0 ? 'text-terminal-green' : 'text-red-500'}`}>
-                      {(asset.pnl_un ?? 0) >= 0 ? '+' : ''}{(asset.pnl_un ?? 0).toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">Rets</p>
-                    <p className={`font-mono text-sm mt-1 ${rets >= 0 ? 'text-terminal-green' : 'text-red-500'}`}>
-                      {rets >= 0 ? '+' : ''}{(rets * 100).toFixed(2)}%
-                    </p>
-                  </div>
+                <div className="space-y-3">
+                  {activeAssets.map(renderAssetRow)}
                 </div>
-
-                {/* EXPANDED SECTION */}
-                {isExpanded && (
-                  <div className="mt-6 pt-6 border-t border-dashed border-white/20 relative z-10 animate-in fade-in slide-in-from-top-4 duration-300">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-4 px-2 sm:px-0">
-                      <div>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Op Price</p>
-                        <p className="font-mono text-white text-sm mt-1">${asset.op_price?.toLocaleString() ?? 0}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Pend To Add</p>
-                        <p className="font-mono text-white text-sm mt-1">${asset.cap_to_add?.toLocaleString() ?? 0}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Cap Added</p>
-                        <p className="font-mono text-white text-sm mt-1">${asset.capAdded?.toLocaleString() ?? 0}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Created Date</p>
-                        <p className="font-mono text-white text-sm mt-1">{asset.created_date ? new Date(asset.created_date).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'}</p>
-                      </div>
-                    </div>
-
-                    {asset.params1 && (
-                      <div className="mb-6 px-2 sm:px-0">
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1.5">Params</p>
-                        <p className="font-mono text-terminal-green text-xs break-all bg-terminal-green/5 p-2 rounded border border-terminal-green/20">
-                          {asset.params1.replace(/\[|\]/g, '')}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-wrap gap-3">
-                      {isAuthenticated ? (
-                        <>
-                          <button 
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              setModalAssetId(asset.id);
-                              setAssetModalMode('add');
-                              setIsAddAssetCapitalModalOpen(true);
-                            }}
-                            className="flex-1 sm:flex-none px-6 py-2.5 bg-terminal-green/10 text-terminal-green border border-terminal-green/50 hover:bg-terminal-green hover:text-black transition-colors rounded-sm text-[10px] font-extrabold uppercase tracking-widest flex items-center justify-center gap-2"
-                          >
-                            <DollarSign size={14} />
-                            Add Capital
-                          </button>
-                          <button 
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              setModalAssetId(asset.id);
-                              setAssetModalMode('remove');
-                              setIsAddAssetCapitalModalOpen(true);
-                            }}
-                            className="flex-1 sm:flex-none px-6 py-2.5 bg-amber-500/10 text-amber-500 border border-amber-500/50 hover:bg-amber-500 hover:text-black transition-colors rounded-sm text-[10px] font-extrabold uppercase tracking-widest flex items-center justify-center gap-2"
-                          >
-                            <XCircle size={14} />
-                            Remove Capital
-                          </button>
-                          {(asset.qty_open ?? 0) > 0 && (
-                            <button 
-                              onClick={(e) => { 
-                                e.stopPropagation(); 
-                                setModalAssetId(asset.id);
-                                setIsClosePositionModalOpen(true);
-                              }}
-                              className="flex-1 sm:flex-none px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/50 hover:bg-red-500 hover:text-white transition-colors rounded-sm text-[10px] font-extrabold uppercase tracking-widest flex items-center justify-center gap-2"
-                            >
-                              <Terminal size={14} />
-                              Close Positions
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-void border border-white/5 rounded-sm">
-                          <Lock size={12} className="text-gray-600" />
-                          <span className="text-[9px] font-mono text-gray-600 uppercase tracking-widest">Auth required for operations</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
-            );
-          })
+            )}
+
+            {/* Inactive Assets Grid */}
+            {inactiveAssets.length > 0 && (
+              <div className="space-y-4 pt-8 border-t border-white/5">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                  <h2 className="text-lg font-mono text-white font-bold tracking-widest uppercase">Inactive Bots / Assets ({inactiveAssets.length})</h2>
+                </div>
+                <div className="space-y-3 opacity-75 hover:opacity-100 transition-opacity duration-300">
+                  {inactiveAssets.map(renderAssetRow)}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
